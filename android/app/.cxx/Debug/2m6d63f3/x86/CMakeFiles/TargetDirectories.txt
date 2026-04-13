@@ -1,0 +1,2 @@
+D:/Projects/smartpay-pos/pos/android/app/.cxx/Debug/2m6d63f3/x86/CMakeFiles/edit_cache.dir
+D:/Projects/smartpay-pos/pos/android/app/.cxx/Debug/2m6d63f3/x86/CMakeFiles/rebuild_cache.dir

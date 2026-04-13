@@ -1,0 +1,1 @@
+D:\Projects\smartpay-pos\pos\build\app\intermediates\cxx\Debug\2m6d63f3\obj\arm64-v8a

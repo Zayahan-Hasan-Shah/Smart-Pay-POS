@@ -1,0 +1,2 @@
+D:/Projects/smartpay-pos/pos/android/app/.cxx/RelWithDebInfo/696l21x3/x86_64/CMakeFiles/edit_cache.dir
+D:/Projects/smartpay-pos/pos/android/app/.cxx/RelWithDebInfo/696l21x3/x86_64/CMakeFiles/rebuild_cache.dir
