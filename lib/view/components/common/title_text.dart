@@ -12,6 +12,7 @@ class TitleText extends StatelessWidget {
   final Color? color;
   final TextAlign? textAlign;
   final bool? isUnderLine;
+  final int? maxLines;
 
   TitleText({
     Key? key,
@@ -22,12 +23,14 @@ class TitleText extends StatelessWidget {
     this.color,
     this.isUnderLine,
     this.textAlign,
+    this.maxLines,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Text(
       title,
+      maxLines: maxLines,
       textAlign: textAlign,
       style: style ??
           GoogleFonts.roboto(

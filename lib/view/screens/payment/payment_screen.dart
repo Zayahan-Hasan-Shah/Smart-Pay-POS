@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pos/core/app_names.dart';
+import 'package:pos/view/components/common/custom_appbar.dart';
 import 'package:usb_serial/transaction.dart';
 import 'package:usb_serial/usb_serial.dart';
 
@@ -190,7 +191,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: const Text('Payment Screen'), centerTitle: true),
+        appBar: CustomAppBar(
+          text: "Payment Screen",
+          backgroundColor: AppColors.primaryMagentaGreenColor,
+        ),
         body: Center(
           child: Column(
             children: <Widget>[

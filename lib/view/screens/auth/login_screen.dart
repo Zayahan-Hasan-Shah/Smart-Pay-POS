@@ -50,109 +50,154 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
-      // resizeToAvoidBottomInset: true,
       body: SafeArea(
-          child: Stack(
-            children: [
-              // Background image
-              Positioned.fill(
-                child: Image.asset(
-                  AssetsPath.background, // Replace with your image path
-                  fit: BoxFit.cover, // Adjust the image to fill the background
-                ),
+        child: Stack(
+          children: [
+            // Background image
+            Positioned.fill(
+              child: Image.asset(
+                AssetsPath.background,
+                fit: BoxFit.cover,
               ),
-              // Content on top of the background
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Form(
-                  key: _formKey,
-                  child: Center(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.symmetric(vertical: 50),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white, // Add the color of the container
-                              borderRadius: BorderRadius.circular(10), // Optional: Add border radius for rounded corners
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2), // Shadow color with opacity
-                                  spreadRadius: 3, // Spread radius of the shadow
-                                  blurRadius: 10, // Blur effect for the shadow
-                                  offset: Offset(0, 5), // Move shadow 5 pixels downwards
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Center(
-                                        child: Image.asset(
-                                          AssetsPath.appLogo,
-                                          width: MediaQuery.of(context).size.height * 0.3,
-                                        ),
+            ),
+            // Content on top of the background
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Form(
+                key: _formKey,
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Login Card
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                spreadRadius: 2,
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 32, bottom: 24),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    // Logo
+                                    Image.asset(
+                                      AssetsPath.appLogo,
+                                      width: MediaQuery.of(context).size.height * 0.25,
+                                    ),
+                                    const SizedBox(height: 24),
+                                    // Welcome Text
+                                    const Text(
+                                      "Welcome to SmartPay",
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textPrimary,
                                       ),
-                                      AppSize.vrtSpace(20),
-                                      headingText("Login ID"),
-                                      AppSize.vrtSpace(5),
-                                      userTextField(userFilled),
-                                      AppSize.vrtSpace(15),
-                                      headingText("Password"),
-                                      AppSize.vrtSpace(5),
-                                      passTextField(passFilled),
-                                      AppSize.vrtSpace(10),
-                                      AppSize.vrtSpace(15),
-                                      loginButton(),
-
-                                    ],
-                                  ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    const Text(
+                                      "Sign in to continue",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                AppSize.vrtSpace(10),
-                                footer(),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
+                              ),
+                              // Form Fields
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 24),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      "Login ID",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    userTextField(userFilled),
+                                    const SizedBox(height: 20),
+                                    const Text(
+                                      "Password",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    passTextField(passFilled),
+                                    const SizedBox(height: 32),
+                                    // Login Button
+                                    loginButton(),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              footer(),
+                            ],
+                          ),
+                        )
+                      ],
                     ),
                   ),
                 ),
               ),
-            ],
-          )),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Container footer() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: const BoxDecoration(
-        color: AppColors.primaryColor,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+      decoration: BoxDecoration(
+        color: AppColors.primaryDark,
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(16),
+          bottomRight: Radius.circular(16),
+        ),
       ),
       child: Center(
         child: Column(
           children: [
-            TitleText(
-              title: "Copyright © 2025. All "
-                  "rights reserved.",
-              color: AppColors.white,
-            ),
-            AppSize.vrtSpace(10),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 100,
+            Text(
+              "Copyright © 2025. All rights reserved.",
+              style: TextStyle(
+                color: AppColors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
               ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   buildIcons(AssetsPath.facebook),
                   buildIcons(AssetsPath.googlePlus),
@@ -239,24 +284,21 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget loginButton() {
-    return  Center(
+    return Center(
       child: FractionallyElevatedButton(
-          onTap: () async {
-            if (_formKey.currentState!.validate()) {
-
-              // billController.getBill();
-
-              // Get.toNamed( RouteNames.homeScreen);
-              Get.toNamed( RouteNames.bottomNavigationScreen);
-            }
-          },
-          child:
-              TitleText(
-            title: "Login",
-            color: AppColors.white,
-            fontSize: 20,
-            weight: FontWeight.w700,
-          )),
+        widthFactor: 0.8,
+        onTap: () async {
+          if (_formKey.currentState!.validate()) {
+            Get.toNamed(RouteNames.bottomNavigationScreen);
+          }
+        },
+        child: TitleText(
+          title: "Sign In",
+          color: AppColors.white,
+          fontSize: 18,
+          weight: FontWeight.w700,
+        ),
+      ),
     );
   }
 

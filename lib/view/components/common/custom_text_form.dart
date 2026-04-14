@@ -51,29 +51,59 @@ class CustomTextFormField extends StatelessWidget {
       inputFormatters: inputFormatters,
       maxLines: obscureText == null ? maxLines : 1,
       obscureText: obscureText,
+      style: const TextStyle(
+        color: AppColors.textPrimary,
+        fontSize: 15,
+        fontWeight: FontWeight.w500,
+      ),
       decoration: InputDecoration(
         suffixIcon: suffix != null
-            ? IconButton(onPressed: onSuffixTap, icon: suffix ?? Icon(Icons.check_circle_outline_outlined))
+            ? IconButton(
+                onPressed: onSuffixTap,
+                icon: suffix ?? const Icon(Icons.check_circle_outline),
+              )
             : null,
         hintText: hint,
+        hintStyle: const TextStyle(
+          color: AppColors.textHint,
+          fontSize: 15,
+        ),
         prefixIcon: prefixIcon,
-        contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-        border: const OutlineInputBorder(),
-        fillColor: AppColors.primaryColor.withOpacity(0.1),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(
+        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppColors.borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppColors.borderColor, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(
             color: AppColors.primaryColor,
+            width: 2,
           ),
         ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: AppColors.errorColor),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(
+            color: AppColors.errorColor,
+            width: 2,
+          ),
+        ),
+        fillColor: AppColors.primaryColor.withOpacity(0.05),
+        filled: true,
         errorStyle: const TextStyle(
           fontStyle: FontStyle.italic,
-          fontSize: 15,
+          fontSize: 13,
           fontWeight: FontWeight.w400,
+          color: AppColors.errorColor,
         ),
-      ),
-      style: const TextStyle(
-        fontWeight: FontWeight.w400,
-        fontSize: 15,
       ),
       obscuringCharacter: "•",
     );

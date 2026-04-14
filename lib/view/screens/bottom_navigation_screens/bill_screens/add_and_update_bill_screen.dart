@@ -13,7 +13,6 @@ import 'package:pos/core/validations/app_validations.dart';
 import 'package:pos/view/components/bill_widgets/bill_date_widget.dart';
 import 'package:pos/view/components/common/custom_text_form.dart';
 import 'package:pos/view/components/common/fractionally_elevated_button.dart';
-import 'package:pos/view/components/common/title_text.dart';
 import 'package:pos/view/components/ocr_widget/ocr_helper.dart';
 
 class AddAndUpdateBillScreen extends StatefulWidget {
@@ -69,148 +68,391 @@ class _AddAndUpdateBillScreenState extends State<AddAndUpdateBillScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundColor,
       body: Form(
         key: formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           children: [
-            FractionallyElevatedButton(
-              onTap: _pickImageAndExtractOCR,
-              widthFactor: 1,
-              buttonBackgroundColor: Colors.blueAccent,
-              child: const Text(
-                'Scan from Image (OCR)',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            // Header
+            Container(
+              padding: const EdgeInsets.all(20),
+              margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppColors.primaryMagentaGreenColor,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(16),
+                  bottomRight: Radius.circular(16),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryDark.withOpacity(0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Add Bill",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    "Create a new bill with details and upload images",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.white,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 10),
-            ValueListenableBuilder<File?>(
-              valueListenable: selectedImageNotifier,
-              builder: (context, imageFile, child) {
-                if (imageFile == null) return const SizedBox(height: 2);
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Image.file(imageFile, height: 200),
-                );
-              },
-            ),
-            const SizedBox(height: 10),
-            TitleText(title: 'Consumer Number'),
-            buildInputWidget(
-              controller: consumerNoController,
-              hint: 'Enter Consumer Number',
-              validator: AppValidations().validateConsumerNo,
-              keyboardType: TextInputType.phone,
-            ),
-            TitleText(title: 'Reference Number'),
-            buildInputWidget(
-              controller: referenceNoController,
-              hint: 'Enter Reference Number',
-              validator: AppValidations().validateReferenceNo,
-            ),
-            TitleText(title: 'Consumer Details'),
-            buildInputWidget(
-              controller: consumerDetailController,
-              hint: 'Enter Consumer Detail',
-              validator: AppValidations().validateConsumerDetail,
-            ),
-            TitleText(
-                title: 'Violation', fontSize: 14, weight: FontWeight.w500),
-            GestureDetector(
-              onTap: () => _selectServiceAndGenerateFees(context),
-              child: AbsorbPointer(
-                child: TextFormField(
-                  controller: serviceController,
-                  decoration: inputDecoration('Select Service'),
+
+            // OCR Section
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Scan Document",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    FractionallyElevatedButton(
+                      onTap: _pickImageAndExtractOCR,
+                      widthFactor: 1,
+                      buttonBackgroundColor: AppColors.secondaryColor,
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.camera_alt, color: AppColors.white),
+                          SizedBox(width: 8),
+                          Text(
+                            'Scan from Camera (OCR)',
+                            style: TextStyle(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ValueListenableBuilder<File?>(
+                      valueListenable: selectedImageNotifier,
+                      builder: (context, imageFile, child) {
+                        if (imageFile == null) return const SizedBox.shrink();
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.file(
+                            imageFile,
+                            height: 150,
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 10),
-            buildInputWidget(
-              controller: amountPKRController,
-              hint: 'Violation Fee',
-              validator: AppValidations().validateAmount,
-              keyboardType: TextInputType.phone,
+            const SizedBox(height: 16),
+
+            // Bill Details Section
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Consumer Information",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFormSection(
+                      'Consumer Number',
+                      consumerNoController,
+                      'Enter Consumer Number',
+                      validator: AppValidations().validateConsumerNo,
+                      keyboardType: TextInputType.phone,
+                    ),
+                    _buildFormSection(
+                      'Reference Number',
+                      referenceNoController,
+                      'Enter Reference Number',
+                      validator: AppValidations().validateReferenceNo,
+                    ),
+                    _buildFormSection(
+                      'Consumer Details',
+                      consumerDetailController,
+                      'Enter Consumer Detail',
+                      validator: AppValidations().validateConsumerDetail,
+                    ),
+                    _buildFormSection(
+                      'Mobile Number',
+                      consumerPhoneNoController,
+                      'Enter Consumer Phone Number',
+                      validator: AppValidations().validatePhoneNumberValidation,
+                      keyboardType: TextInputType.phone,
+                    ),
+                  ],
+                ),
+              ),
             ),
-            buildInputWidget(
-              controller: lateFeePKRController,
-              hint: 'Violation Late Fee',
-              validator: AppValidations().validateAmount,
-              keyboardType: TextInputType.phone,
-            ),
-            BillDateWidget(
-              controller: billDueDateController,
-              label: 'Bill Due Date',
-              context: context,
-              onDateSelected: (date) => billDueDate = date,
-            ),
-            const SizedBox(height: 10),
-            BillDateWidget(
-              controller: billExpiryController,
-              label: 'Bill Expiry Date',
-              context: context,
-              onDateSelected: (date) => billExpiry = date,
-            ),
-            TitleText(title: 'Mobile Number'),
-            buildInputWidget(
-              controller: consumerPhoneNoController,
-              hint: 'Enter Consumer Phone Number',
-              validator: AppValidations().validatePhoneNumberValidation,
-              keyboardType: TextInputType.phone,
+            const SizedBox(height: 16),
+
+            // Billing Information Section
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Billing Information",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Violation Selection
+                    const Text(
+                      "Violation Type",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: () => _selectServiceAndGenerateFees(context),
+                      child: AbsorbPointer(
+                        child: TextFormField(
+                          controller: serviceController,
+                          decoration: InputDecoration(
+                            hintText: 'Select Violation',
+                            prefixIcon: const Icon(
+                              Icons.category,
+                              color: AppColors.primaryMagentaGreenColor,
+                            ),
+                            suffixIcon: const Icon(
+                              Icons.arrow_drop_down,
+                              color: AppColors.textSecondary,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color: AppColors.borderColor,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color: AppColors.borderColor,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color: AppColors.primaryColor,
+                                width: 2,
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: AppColors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildFormSection(
+                      'Violation Fee',
+                      amountPKRController,
+                      'Amount in PKR',
+                      validator: AppValidations().validateAmount,
+                      keyboardType: TextInputType.number,
+                    ),
+                    _buildFormSection(
+                      'Late Fee',
+                      lateFeePKRController,
+                      'Late Fee in PKR',
+                      validator: AppValidations().validateAmount,
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 16),
+                    // Date Pickers
+                    BillDateWidget(
+                      controller: billDueDateController,
+                      label: 'Bill Due Date',
+                      context: context,
+                      onDateSelected: (date) => billDueDate = date,
+                    ),
+                    const SizedBox(height: 12),
+                    BillDateWidget(
+                      controller: billExpiryController,
+                      label: 'Bill Expiry Date',
+                      context: context,
+                      onDateSelected: (date) => billExpiry = date,
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 24),
+
+            // Action Buttons
             Row(
               children: [
-                Expanded(child: sendButton()),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.warningColor,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: _handleSubmit('Send Challan'),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.send, color: AppColors.white, size: 24),
+                        SizedBox(width: 8),
+                        Text(
+                          'Send Challan',
+                          style: TextStyle(
+                            color: AppColors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 const SizedBox(width: 12),
-                Expanded(child: addBill()),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryMagentaGreenColor,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: _handleSubmit('Add Challan'),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.add_circle,
+                          color: AppColors.white,
+                          size: 24,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Add Challan',
+                          style: TextStyle(
+                            color: AppColors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
 
-  InputDecoration inputDecoration(String hint) => InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.grey),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: const BorderSide(color: Colors.grey),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: const BorderSide(color: AppColors.appGreen),
-        ),
-        contentPadding: const EdgeInsets.only(left: 16),
-      );
-
-  Widget buildInputWidget({
-    required TextEditingController controller,
-    required String hint,
+  Widget _buildFormSection(
+    String label,
+    TextEditingController controller,
+    String hint, {
     required String? Function(String?) validator,
-    TextInputType? keyboardType,
-    bool readOnly = false,
-    bool obsText = false,
+    TextInputType keyboardType = TextInputType.text,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: CustomTextFormField(
-        controller: controller,
-        hint: hint,
-        value: readOnly,
-        validator: validator,
-        keyboardType: keyboardType,
-        obscureText: obsText,
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        CustomTextFormField(
+          controller: controller,
+          hint: hint,
+          validator: validator,
+          keyboardType: keyboardType,
+          obscureText: false,
+        ),
+        const SizedBox(height: 12),
+      ],
     );
   }
+
+  InputDecoration inputDecoration(String hint) => InputDecoration(
+    hintText: hint,
+    filled: true,
+    fillColor: AppColors.white,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: AppColors.borderColor),
+    ),
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: AppColors.borderColor),
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+      borderSide: const BorderSide(color: AppColors.primaryColor, width: 2),
+    ),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+  );
 
   Future<void> _selectServiceAndGenerateFees(BuildContext context) async {
     final result = await showDialog<String>(
@@ -226,10 +468,15 @@ class _AddAndUpdateBillScreenState extends State<AddAndUpdateBillScreen> {
           title: const Text('Select Violation'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: violations
-                .map((v) => ListTile(
-                    title: Text(v), onTap: () => Navigator.pop(context, v)))
-                .toList(),
+            children:
+                violations
+                    .map(
+                      (v) => ListTile(
+                        title: Text(v),
+                        onTap: () => Navigator.pop(context, v),
+                      ),
+                    )
+                    .toList(),
           ),
         );
       },
@@ -281,91 +528,74 @@ class _AddAndUpdateBillScreenState extends State<AddAndUpdateBillScreen> {
     }
   }
 
-  Widget sendButton() => FractionallyElevatedButton(
-        onTap: _handleSubmit('Send Challan'),
-        widthFactor: 1,
-        buttonBackgroundColor: Colors.amber,
-        child: const Text(
-          'Send Challan',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      );
-
-  Widget addBill() => FractionallyElevatedButton(
-        onTap: _handleSubmit('Add Challan'),
-        widthFactor: 1,
-        child: const Text(
-          'Add Challan',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      );
-
   VoidCallback _handleSubmit(String action) => () async {
-        if (!(formKey.currentState?.validate() ?? false)) return;
+    if (!(formKey.currentState?.validate() ?? false)) return;
 
-        final amount = int.tryParse(amountPKRController.text.trim());
-        final lateFee = int.tryParse(lateFeePKRController.text.trim());
+    final amount = int.tryParse(amountPKRController.text.trim());
+    final lateFee = int.tryParse(lateFeePKRController.text.trim());
 
-        if (billDueDate == null || billExpiry == null || billMonth == null) {
-          showSnack('Please select a violation to generate bill dates first.',
-              Colors.red);
-          return;
-        }
+    if (billDueDate == null || billExpiry == null || billMonth == null) {
+      showSnack(
+        'Please select a violation to generate bill dates first.',
+        Colors.red,
+      );
+      return;
+    }
 
-        if (amount == null || lateFee == null) {
-          showSnack('Amount or late fee is not valid', Colors.red);
-          return;
-        }
+    if (amount == null || lateFee == null) {
+      showSnack('Amount or late fee is not valid', Colors.red);
+      return;
+    }
 
-        try {
-          print('Amount: $amount');
-          print('Late Fee: $lateFee');
-          print('Consumer Number: ${consumerNoController.text.trim()}');
-          print('Due Date: ${DateFormat('yyyyMMdd').format(billDueDate!)}');
+    try {
+      print('Amount: $amount');
+      print('Late Fee: $lateFee');
+      print('Consumer Number: ${consumerNoController.text.trim()}');
+      print('Due Date: ${DateFormat('yyyyMMdd').format(billDueDate!)}');
 
-          await billController.createBill(
-            amount: amount,
-            lateFeeAmount: lateFee,
-            consumerNumber: consumerNoController.text.trim(),
-            dueDate: DateFormat('yyyyMMdd').format(billDueDate!),
-            expDate: DateFormat('yyyyMMdd').format(billExpiry!),
-            billingMonth: DateFormat('yyMM').format(billMonth!),
-            email: "xyz@email.com",
-            cellNumber: consumerPhoneNoController.text.trim(),
-            consumerDetail: consumerDetailController.text.trim(),
-            referenceInfo: referenceNoController.text.trim(),
-            reserved: serviceController.text.trim(),
-          );
+      await billController.createBill(
+        amount: amount,
+        lateFeeAmount: lateFee,
+        consumerNumber: consumerNoController.text.trim(),
+        dueDate: DateFormat('yyyyMMdd').format(billDueDate!),
+        expDate: DateFormat('yyyyMMdd').format(billExpiry!),
+        billingMonth: DateFormat('yyMM').format(billMonth!),
+        email: "xyz@email.com",
+        cellNumber: consumerPhoneNoController.text.trim(),
+        consumerDetail: consumerDetailController.text.trim(),
+        referenceInfo: referenceNoController.text.trim(),
+        reserved: serviceController.text.trim(),
+      );
 
-          if (action == 'Send Challan') {
-            consumerNoController.clear();
-            referenceNoController.clear();
-            consumerDetailController.clear();
-            amountPKRController.clear();
-            lateFeePKRController.clear();
-            consumerPhoneNoController.clear();
-            consumerEmailController.clear();
-            serviceController.clear();
+      if (action == 'Send Challan') {
+        consumerNoController.clear();
+        referenceNoController.clear();
+        consumerDetailController.clear();
+        amountPKRController.clear();
+        lateFeePKRController.clear();
+        consumerPhoneNoController.clear();
+        consumerEmailController.clear();
+        serviceController.clear();
 
-            setState(() {
-              billDueDate = null;
-              billExpiry = null;
-              billMonth = null;
-              billDueDateController.clear();
-              billExpiryController.clear();
-            });
+        setState(() {
+          billDueDate = null;
+          billExpiry = null;
+          billMonth = null;
+          billDueDateController.clear();
+          billExpiryController.clear();
+        });
 
-            showSnack('Challan successfully added.', Colors.green);
-          }
-        } catch (e) {
-          showSnack('Error: $e', Colors.red);
-        }
-      };
+        showSnack('Challan successfully added.', Colors.green);
+      }
+    } catch (e) {
+      showSnack('Error: $e', Colors.red);
+    }
+  };
 
   void showSnack(String msg, [Color color = Colors.black]) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: color),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
   }
 }
 

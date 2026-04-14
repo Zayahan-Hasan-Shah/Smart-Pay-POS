@@ -1,5 +1,4 @@
 
-
 import 'package:flutter/material.dart';
 import 'package:pos/view/components/common/title_text.dart';
 
@@ -16,12 +15,19 @@ class ClearButton extends StatelessWidget {
     return SizedBox(
       width: MediaQuery.sizeOf(context).width * 0.4,
       child: ElevatedButton(
-        // widthFactor: 0.5,
-        style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColor),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primaryColor,
+          foregroundColor: AppColors.white,
+          elevation: 2,
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
         onPressed: onPressed,
         child: TitleText(
           title: title ?? "Clear",
-          weight: FontWeight.w500,
+          weight: FontWeight.w600,
           color: AppColors.white,
         ),
       ),

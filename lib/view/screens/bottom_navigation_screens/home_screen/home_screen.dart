@@ -1,13 +1,8 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pos/view/screens/payment/payment_screen.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../controller/bill_controller/bill_controller.dart';
-import '../../../../core/app_names.dart';
 import '../../../../core/utils/app_colors.dart';
-import '../../../components/common/clear_button.dart';
-import '../../../components/common/custom_text_form.dart';
 import '../../../components/common/fractionally_elevated_button.dart';
 import '../../../components/common/title_text.dart';
 
@@ -27,295 +22,341 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
+        backgroundColor: AppColors.backgroundColor,
         body: SingleChildScrollView(
           child: Column(
             children: [
-              // Main content
-              Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: TextFormField(
+              // Header Section
+              Container(
+                padding: const EdgeInsets.all(20),
+                margin: const EdgeInsets.only(
+                    left: 20,
+                    right:20,
+                    bottom: 20
+                ),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryMagentaGreenColor,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primaryDark.withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TitleText(
+                      title: "Find Bill",
+                      fontSize: 30,
+                      weight: FontWeight.bold,
+                      color: AppColors.white,
+                    ),
+                    const SizedBox(height: 4),
+                    TitleText(
+                      title: "Enter consumer number to view bill details",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppColors.white,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      
+                    ),
+                  ],
+                ),
+              ),
+
+              // Search and Fetch Section
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // Search Field
+                    TextFormField(
                       controller: consumerNumberController,
-                      readOnly: false,
+                      keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        hintText: "Consumer Number",
+                        hintText: "Enter Consumer Number",
                         hintStyle: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
+                          color: AppColors.textHint,
+                          fontSize: 14,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.numbers,
+                          color: AppColors.primaryMagentaGreenColor,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: const Icon(
+                            Icons.clear,
+                            color: AppColors.textSecondary,
+                          ),
+                          onPressed: () => consumerNumberController.clear(),
+                        ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide: const BorderSide(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: AppColors.borderColor,
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: const BorderSide(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: AppColors.borderColor,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide(color: AppColors.appGreen),
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: AppColors.primaryDark,
+                            width: 2,
+                          ),
                         ),
-                        contentPadding: const EdgeInsets.only(left: 16),
-                        suffixIcon: const Icon(
-                          Icons.filter_alt_outlined,
-                          size: 28,
+                        filled: true,
+                        fillColor: AppColors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12,
                         ),
                       ),
+                      style: const TextStyle(color: AppColors.textPrimary),
                     ),
-                  ),
-                  SizedBox(height: 10),
-                  Center(
-                    child: FractionallyElevatedButton(
+                    const SizedBox(height: 16),
+                    // Fetch Button
+                    FractionallyElevatedButton(
+                      widthFactor: 1,
+                      buttonBackgroundColor: AppColors.primaryMagentaGreenColor,
                       onTap: () async {
-                        await billController
-                            .getBill(consumerNumberController.text);
+                        await billController.getBill(
+                          consumerNumberController.text,
+                        );
                       },
                       child: TitleText(
-                        title: "Fetch",
+                        title: "Fetch Bill Details",
                         color: AppColors.white,
-                        fontSize: 20,
+                        fontSize: 16,
                         weight: FontWeight.w700,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
 
-              SizedBox(
-                height: 20,
-              ),
-
-              // Blur effect and CircularProgressIndicator
+              // Loading Indicator
               Obx(() {
                 if (billController.isLoading.value) {
-                  return BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
-                    child: Container(
-                      color: AppColors.primaryColor.withOpacity(0.4),
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.appGreen,
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 32),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircularProgressIndicator(
+                          color: AppColors.primaryDark,
+                          strokeWidth: 3,
                         ),
-                      ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "Loading bill details...",
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 }
-                return SizedBox.shrink();
+                return const SizedBox.shrink();
               }),
+
+              // Bill Details Card
               Obx(
-                () => billController.isEmpty.value
-                    ? SizedBox.shrink()
-                    : Visibility(
-                        visible: (billController.isEmpty.value == false),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                                decoration: const BoxDecoration(
-                                  color: AppColors.primaryColor,
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(13),
-                                    topRight: Radius.circular(13),
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      const Text(
-                                        "Consumer No",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 18),
+                () =>
+                    billController.isEmpty.value
+                        ? const SizedBox.shrink()
+                        : Visibility(
+                          visible: !billController.isEmpty.value,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                children: [
+                                  // Card Header
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: const BoxDecoration(
+                                      color: AppColors.primaryDark,
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(16),
+                                        topRight: Radius.circular(16),
                                       ),
-                                      Text(
-                                        billController.getBillResponse.value?[0]
-                                                .infoNo
-                                                .toString() ??
-                                            "",
-                                        style: const TextStyle(
-                                            color: Colors.white, fontSize: 18),
-                                      ),
-                                    ],
-                                  ),
-                                )),
-                            Container(
-                                decoration: const BoxDecoration(
-                                  color: AppColors.white,
-                                ),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 8.0),
-                                              child: const Text(
-                                                " Amount",
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 18,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 8.0),
-                                              child: const Text(
-                                                "Due Date",
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 18,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 8.0),
-                                              child: const Text(
-                                                "Late pay fee",
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 18,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 8.0),
-                                              child: const Text(
-                                                "Pay after due date",
-                                                style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 18,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                          ],
+                                        const Text(
+                                          "Bill Information",
+                                          style: TextStyle(
+                                            color: AppColors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 8.0),
-                                              child: Text(
-                                                billController.getBillResponse
-                                                        .value?[0].trtAmt
+                                        const SizedBox(height: 8),
+                                        RichText(
+                                          text: TextSpan(
+                                            text: "Consumer No: ",
+                                            style: const TextStyle(
+                                              color: AppColors.white,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text:
+                                                    billController
+                                                        .getBillResponse
+                                                        .value?[0]
+                                                        .infoNo
                                                         .toString() ??
-                                                    "",
+                                                    "N/A",
                                                 style: const TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 18,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                  color: AppColors.white,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 8.0),
-                                              child: Text(
-                                                billController.getBillResponse
-                                                        .value?[0].trDate
-                                                        .toString()
-                                                        .substring(0, 10) ??
-                                                    "",
-                                                style: const TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 18,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 8.0),
-                                              child: Text(
-                                                billController.getBillResponse
-                                                        .value?[0].troAmt
-                                                        .toString() ??
-                                                    "",
-                                                style: const TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 18,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 8.0),
-                                              child: Text(
-                                                billController.getBillResponse
-                                                        .value?[0].cardTAmt
-                                                        .toString() ??
-                                                    "",
-                                                style: const TextStyle(
-                                                    color: Colors.black,
-                                                    fontSize: 18,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ],
                                     ),
-                                    SizedBox(
-                                      height: 15,
+                                  ),
+                                  // Card Body
+                                  Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      children: [
+                                        _buildInfoRow(
+                                          "Amount",
+                                          billController
+                                                  .getBillResponse
+                                                  .value?[0]
+                                                  .trtAmt
+                                                  .toString() ??
+                                              "N/A",
+                                        ),
+                                        const Divider(height: 16),
+                                        _buildInfoRow(
+                                          "Due Date",
+                                          billController
+                                                  .getBillResponse
+                                                  .value?[0]
+                                                  .trDate
+                                                  ?.toString()
+                                                  .substring(0, 10) ??
+                                              "N/A",
+                                        ),
+                                        const Divider(height: 16),
+                                        _buildInfoRow(
+                                          "Late Payment Fee",
+                                          billController
+                                                  .getBillResponse
+                                                  .value?[0]
+                                                  .troAmt
+                                                  .toString() ??
+                                              "N/A",
+                                        ),
+                                        const Divider(height: 16),
+                                        _buildInfoRow(
+                                          "Total Amount",
+                                          billController
+                                                  .getBillResponse
+                                                  .value?[0]
+                                                  .cardTAmt
+                                                  .toString() ??
+                                              "N/A",
+                                        ),
+                                        const SizedBox(height: 24),
+                                        // Pay Button
+                                        FractionallyElevatedButton(
+                                          widthFactor: 0.6,
+                                          buttonBackgroundColor:
+                                              AppColors.successColor,
+                                          onTap: () async {
+                                            if (billController
+                                                    .getBillResponse
+                                                    .value!
+                                                    .isNotEmpty ||
+                                                billController
+                                                        .getBillResponse
+                                                        .value !=
+                                                    null) {
+                                              var temp = billController
+                                                  .getBillResponse
+                                                  .value![0]
+                                                  .trtAmt!
+                                                  .split(".");
+                                              var amount = temp[0];
+                                              Get.to(
+                                                PaymentScreen(amount: amount),
+                                              );
+                                            }
+                                          },
+                                          child: TitleText(
+                                            title: "Proceed to Pay",
+                                            color: AppColors.white,
+                                            fontSize: 16,
+                                            weight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    Center(
-                                        child: FractionallyElevatedButton(
-                                      widthFactor: 0.4,
-                                      onTap: () async {
-                                        if (billController.getBillResponse
-                                                .value!.isNotEmpty ||
-                                            billController
-                                                    .getBillResponse.value !=
-                                                null) {
-                                          var temp = billController
-                                              .getBillResponse.value![0].trtAmt!
-                                              .split(".");
-                                          var amount = temp[0];
-                                          Get.to(PaymentScreen(amount: amount));
-                                        }
-                                      },
-                                      child: TitleText(
-                                        title: "Pay",
-                                        color: AppColors.white,
-                                        fontSize: 20,
-                                        weight: FontWeight.w700,
-                                      ),
-                                    )),
-                                    SizedBox(
-                                      height: 15,
-                                    ),
-                                  ],
-                                )),
-                          ],
-                        )),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 }

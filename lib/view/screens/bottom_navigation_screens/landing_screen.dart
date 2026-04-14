@@ -19,7 +19,7 @@ class _LandingScreenState extends State<LandingScreen> {
     return Obx(() => Scaffold(
           appBar: CustomAppBar(
             text: bottomNavigationController.appBarText.value,
-            backgroundColor: AppColors.backgroundColor,
+            backgroundColor: AppColors.primaryMagentaGreenColor,
           ),
           body: PopScope(
               canPop: false,
@@ -33,7 +33,7 @@ class _LandingScreenState extends State<LandingScreen> {
                 topLeft: Radius.circular(15),
                 topRight: Radius.circular(15),
               ),
-              color: AppColors.primaryColor,
+              color: AppColors.primaryMagentaGreenColor,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
