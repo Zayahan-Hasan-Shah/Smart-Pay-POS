@@ -30,9 +30,9 @@ class AppRoutes {
       name: RouteNames.addUpdateScreen,
       page: () => AddAndUpdateBillScreen(),
     ),
-    GetPage(
-      name: RouteNames.bottomNavigationScreen,
-      page: () => LandingScreen(),
-    ),
+    // GetPage(
+    //   name: RouteNames.bottomNavigationScreen,
+    //   page: () => LandingScreen(),
+    // ),
   ];
 }

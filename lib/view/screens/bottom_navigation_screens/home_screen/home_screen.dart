@@ -1,19 +1,18 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pos/controller/bottom_controller/bottom_navigation_controller.dart';
 import 'package:pos/core/utils/app_assets.dart';
+import 'package:pos/view/components/common/bottom_wave_painter.dart';
+import 'package:pos/view/components/common/custom_appbar.dart';
 import 'package:pos/view/components/common/custom_button/custom_button.dart';
 import 'package:pos/view/components/common/custom_text_field/custom_text_field.dart';
 import 'package:pos/view/components/common/heading_text.dart';
 import 'package:pos/view/screens/payment/payment_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../controller/bill_controller/bill_controller.dart';
-import '../../../../core/app_names.dart';
 import '../../../../core/utils/app_colors.dart';
-import '../../../components/common/clear_button.dart';
-import '../../../components/common/custom_text_form.dart';
 import '../../../components/common/fractionally_elevated_button.dart';
-import '../../../components/common/title_text.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final billController = Get.put(BillController());
+  var bottomNavigationController = Get.put(BottomNavigationController());
   TextEditingController consumerNumberController = TextEditingController();
 
   @override
@@ -32,7 +32,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        // backgroundColor: ,
+        appBar: CustomAppBar(),
+        // backgroundColor: AppColors.white,
+        bottomNavigationBar: SizedBox(
+          height: 100,
+          child: CustomPaint(painter: BottomWavePainter()),
+        ),
         body: SingleChildScrollView(
           child: Column(
             children: [
@@ -42,9 +47,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 // mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(height: 15.h),
-                  Center(child: Image.asset(AssetsPath.appLogo, height: 100)),
-
-                  SizedBox(height: 9.h),
+                  // Center(child: Image.asset(AssetsPath.appLogo, height: 100)),
+                  // SizedBox(height: 9.h),
                   HeadingText(text: 'Consumer Number'),
 
                   Padding(
@@ -66,19 +70,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                       title: 'Fetch',
                     ),
-                    //  FractionallyElevatedButton(
-                    //   onTap: () async {
-                    //     await billController.getBill(
-                    //       consumerNumberController.text,
-                    //     );
-                    //   },
-                    //   child: TitleText(
-                    //     title: "FETCH",
-                    //     color: AppColors.white,
-                    //     fontSize: 13,
-                    //     weight: FontWeight.w700,
-                    //   ),
-                    // ),
                   ),
                 ],
               ),
@@ -336,7 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             );
                                           }
                                         },
-                                        title: 'Pay'
+                                        title: 'Pay',
                                         // TitleText(
                                         //   title: "Pay",
                                         //   color: AppColors.white,

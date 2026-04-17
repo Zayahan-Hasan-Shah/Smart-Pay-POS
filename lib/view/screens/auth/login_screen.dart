@@ -119,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
           // billController.getBill();
 
           // Get.toNamed( RouteNames.homeScreen);
-          Get.toNamed(RouteNames.bottomNavigationScreen);
+          Get.toNamed(RouteNames.homeScreen);
         }
       }, title: 'Login', context: context)),
                     SizedBox(height: 3.h),
