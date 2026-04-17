@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const primaryColor = Color(0xff448f44);
+  static const primaryColor = Color(0xff228b22);
   static const appGreen = Color(0xff0e6013);
+
+  // 
+    static const darkGreen = Color(0xFF2E7D32);
+    static const lightGreen = Color(0xFF66BB6A);
+
   static const secondaryColor = Color(0xff275e9c);
 
   static const backgroundColor = Color(0xfff7f7f7);
-  static const appBlue = Color(0xff527daf);
+  static const appBlue = Color.fromRGBO(82, 125, 175, 1);
   static const appGrey = Color(0xff607d8b);
   static const pdfButtonColor = Color(0xffd32f2f);
   static const excelButtonColor = Color(0xfffbc02d);

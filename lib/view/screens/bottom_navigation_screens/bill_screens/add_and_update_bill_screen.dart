@@ -11,6 +11,8 @@ import 'package:pos/controller/bill_controller/bill_controller.dart';
 import 'package:pos/core/utils/app_colors.dart';
 import 'package:pos/core/validations/app_validations.dart';
 import 'package:pos/view/components/bill_widgets/bill_date_widget.dart';
+import 'package:pos/view/components/common/custom_appbar.dart';
+import 'package:pos/view/components/common/custom_text_field/custom_text_field.dart';
 import 'package:pos/view/components/common/custom_text_form.dart';
 import 'package:pos/view/components/common/fractionally_elevated_button.dart';
 import 'package:pos/view/components/common/title_text.dart';
@@ -26,6 +28,7 @@ class AddAndUpdateBillScreen extends StatefulWidget {
 class _AddAndUpdateBillScreenState extends State<AddAndUpdateBillScreen> {
   final billController = Get.put(BillController(), permanent: false);
   final formKey = GlobalKey<FormState>();
+  final _appValidations = AppValidations();
 
   // Controllers
   final consumerNoController = TextEditingController();
@@ -69,6 +72,7 @@ class _AddAndUpdateBillScreenState extends State<AddAndUpdateBillScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // appBar: CustomAppBar(),
       body: Form(
         key: formKey,
         child: ListView(
@@ -76,13 +80,9 @@ class _AddAndUpdateBillScreenState extends State<AddAndUpdateBillScreen> {
           children: [
             FractionallyElevatedButton(
               onTap: _pickImageAndExtractOCR,
-              widthFactor: 1,
-              buttonBackgroundColor: Colors.blueAccent,
-              child: const Text(
-                'Scan from Image (OCR)',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
+              // widthFactor: 1,
+              // buttonBackgroundColor: Colors.blueGrey.shade400,
+              title: 'SCAN FROM IMAGE (OCR)',
             ),
             const SizedBox(height: 10),
             ValueListenableBuilder<File?>(
@@ -97,68 +97,113 @@ class _AddAndUpdateBillScreenState extends State<AddAndUpdateBillScreen> {
             ),
             const SizedBox(height: 10),
             TitleText(title: 'Consumer Number'),
-            buildInputWidget(
+            CustomTextField(
               controller: consumerNoController,
-              hint: 'Enter Consumer Number',
-              validator: AppValidations().validateConsumerNo,
+              validator: _appValidations.validateConsumerNo,
               keyboardType: TextInputType.phone,
+              hintText: 'Consumer Number',
             ),
+            // buildInputWidget(
+            //   controller: consumerNoController,
+            //   hint: 'Enter Consumer Number',
+
+            //   validator: _appValidations.validateConsumerNo,
+            //   keyboardType: TextInputType.phone,
+            // ),
             TitleText(title: 'Reference Number'),
-            buildInputWidget(
+            CustomTextField(
               controller: referenceNoController,
-              hint: 'Enter Reference Number',
-              validator: AppValidations().validateReferenceNo,
+              hintText: 'Reference Number',
+              validator: _appValidations.validateReferenceNo,
             ),
+            // buildInputWidget(
+            //   controller: referenceNoController,
+            //   hintText: 'Reference Number',
+            //   validator: _appValidations.validateReferenceNo,
+            // ),
             TitleText(title: 'Consumer Details'),
-            buildInputWidget(
+            CustomTextField(
               controller: consumerDetailController,
-              hint: 'Enter Consumer Detail',
-              validator: AppValidations().validateConsumerDetail,
+              hintText: 'Consumer Detail',
+              validator: _appValidations.validateConsumerDetail,
             ),
+            // buildInputWidget(
+            //   controller: consumerDetailController,
+            //   hint: 'Enter Consumer Detail',
+            //   validator: _appValidations.validateConsumerDetail,
+            // ),
             TitleText(
-                title: 'Violation', fontSize: 14, weight: FontWeight.w500),
+              title: 'Violation',
+              fontSize: 14,
+              weight: FontWeight.w500,
+            ),
             GestureDetector(
               onTap: () => _selectServiceAndGenerateFees(context),
               child: AbsorbPointer(
-                child: TextFormField(
+                child:
+                // TextFormField(
+                //   controller: serviceController,
+                //   decoration: inputDecoration('Select Service'),
+                // ),
+                CustomTextField(
                   controller: serviceController,
-                  decoration: inputDecoration('Select Service'),
+                  hintText: 'Select Service',
                 ),
               ),
             ),
             const SizedBox(height: 10),
-            buildInputWidget(
+            CustomTextField(
               controller: amountPKRController,
-              hint: 'Violation Fee',
-              validator: AppValidations().validateAmount,
+              hintText: 'Violation Fee',
+              validator: _appValidations.validateAmount,
               keyboardType: TextInputType.phone,
             ),
-            buildInputWidget(
+            const SizedBox(height: 10),
+            // buildInputWidget(
+            //   controller: amountPKRController,
+            //   hint: 'Violation Fee',
+            //   validator: _appValidations.validateAmount,
+            //   keyboardType: TextInputType.phone,
+            // ),
+            CustomTextField(
               controller: lateFeePKRController,
-              hint: 'Violation Late Fee',
-              validator: AppValidations().validateAmount,
+              hintText: 'Violation Late Fee',
+              validator: _appValidations.validateAmount,
               keyboardType: TextInputType.phone,
             ),
+            // buildInputWidget(
+            //   controller: lateFeePKRController,
+            //   hint: 'Violation Late Fee',
+            //   validator: _appValidations.validateAmount,
+            //   keyboardType: TextInputType.phone,
+            // ),
             BillDateWidget(
               controller: billDueDateController,
-              label: 'Bill Due Date',
+              hint: 'Bill Due Date',
               context: context,
               onDateSelected: (date) => billDueDate = date,
             ),
             const SizedBox(height: 10),
             BillDateWidget(
               controller: billExpiryController,
-              label: 'Bill Expiry Date',
+              hint: 'Bill Expiry Date',
               context: context,
               onDateSelected: (date) => billExpiry = date,
             ),
+            SizedBox(height: 5),
             TitleText(title: 'Mobile Number'),
-            buildInputWidget(
+            CustomTextField(
               controller: consumerPhoneNoController,
-              hint: 'Enter Consumer Phone Number',
-              validator: AppValidations().validatePhoneNumberValidation,
+              hintText: 'Enter Consumer Phone Number',
+              validator: _appValidations.validatePhoneNumberValidation,
               keyboardType: TextInputType.phone,
             ),
+            // buildInputWidget(
+            //   controller: consumerPhoneNoController,
+            //   hint: 'Enter Consumer Phone Number',
+            //   validator: _appValidations.validatePhoneNumberValidation,
+            //   keyboardType: TextInputType.phone,
+            // ),
             const SizedBox(height: 24),
             Row(
               children: [
@@ -173,44 +218,48 @@ class _AddAndUpdateBillScreenState extends State<AddAndUpdateBillScreen> {
     );
   }
 
-  InputDecoration inputDecoration(String hint) => InputDecoration(
-        hintText: hint,
-        hintStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.grey),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: const BorderSide(color: Colors.grey),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: const BorderSide(color: AppColors.appGreen),
-        ),
-        contentPadding: const EdgeInsets.only(left: 16),
-      );
+  // InputDecoration inputDecoration(String hint) => InputDecoration(
+  //   hintText: hint,
+  //   hintStyle: TextStyle(
+  //     fontSize: 13,
+  //     fontWeight: FontWeight.bold,
+  //     color: Colors.black26,
+  //   ),
+  //   border: UnderlineInputBorder(
+  //     borderRadius: BorderRadius.circular(8),
+  //     borderSide: const BorderSide(color: Colors.grey),
+  //   ),
+  //   enabledBorder: UnderlineInputBorder(
+  //     borderRadius: BorderRadius.circular(8),
+  //     borderSide: const BorderSide(color: Colors.grey),
+  //   ),
+  //   focusedBorder: UnderlineInputBorder(
+  //     borderRadius: BorderRadius.circular(8),
+  //     borderSide: const BorderSide(color: AppColors.appGreen),
+  //   ),
+  //   contentPadding: const EdgeInsets.only(left: 16),
+  // );
 
-  Widget buildInputWidget({
-    required TextEditingController controller,
-    required String hint,
-    required String? Function(String?) validator,
-    TextInputType? keyboardType,
-    bool readOnly = false,
-    bool obsText = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: CustomTextFormField(
-        controller: controller,
-        hint: hint,
-        value: readOnly,
-        validator: validator,
-        keyboardType: keyboardType,
-        obscureText: obsText,
-      ),
-    );
-  }
+  // Widget buildInputWidget({
+  //   required TextEditingController controller,
+  //   required String hint,
+  //   required String? Function(String?) validator,
+  //   TextInputType? keyboardType,
+  //   bool readOnly = false,
+  //   bool obsText = false,
+  // }) {
+  //   return Padding(
+  //     padding: const EdgeInsets.only(bottom: 10),
+  //     child: CustomTextField(
+  //       controller: controller,
+  //       hintText: hint,
+  //       // value: readOnly,
+  //       validator: validator,
+  //       keyboardType: keyboardType,
+  //       obscureText: obsText,
+  //     ),
+  //   );
+  // }
 
   Future<void> _selectServiceAndGenerateFees(BuildContext context) async {
     final result = await showDialog<String>(
@@ -226,10 +275,15 @@ class _AddAndUpdateBillScreenState extends State<AddAndUpdateBillScreen> {
           title: const Text('Select Violation'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: violations
-                .map((v) => ListTile(
-                    title: Text(v), onTap: () => Navigator.pop(context, v)))
-                .toList(),
+            children:
+                violations
+                    .map(
+                      (v) => ListTile(
+                        title: Text(v),
+                        onTap: () => Navigator.pop(context, v),
+                      ),
+                    )
+                    .toList(),
           ),
         );
       },
@@ -281,91 +335,98 @@ class _AddAndUpdateBillScreenState extends State<AddAndUpdateBillScreen> {
     }
   }
 
-  Widget sendButton() => FractionallyElevatedButton(
-        onTap: _handleSubmit('Send Challan'),
-        widthFactor: 1,
-        buttonBackgroundColor: Colors.amber,
-        child: const Text(
-          'Send Challan',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      );
+  Widget sendButton() {
+    return FractionallyElevatedButton(
+      buttonBackgroundColor: Colors.white70,
+      onTap: _handleSubmit('Send Challan'),
+      // widthFactor: 1,
+      // buttonBackgroundColor: Colors.amber,
+      title: 'Send Challan',
+      //  const Text(
+      //   'Send Challan',
+      //   style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      // ),
+    );
+  }
 
   Widget addBill() => FractionallyElevatedButton(
-        onTap: _handleSubmit('Add Challan'),
-        widthFactor: 1,
-        child: const Text(
-          'Add Challan',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-      );
+    onTap: _handleSubmit('Add Challan'),
+    // widthFactor: 1,
+    title: 'Add Challan',
+    //  const Text(
+    //   'Add Challan',
+    //   style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+    // ),
+  );
 
   VoidCallback _handleSubmit(String action) => () async {
-        if (!(formKey.currentState?.validate() ?? false)) return;
+    if (!(formKey.currentState?.validate() ?? false)) return;
 
-        final amount = int.tryParse(amountPKRController.text.trim());
-        final lateFee = int.tryParse(lateFeePKRController.text.trim());
+    final amount = int.tryParse(amountPKRController.text.trim());
+    final lateFee = int.tryParse(lateFeePKRController.text.trim());
 
-        if (billDueDate == null || billExpiry == null || billMonth == null) {
-          showSnack('Please select a violation to generate bill dates first.',
-              Colors.red);
-          return;
-        }
+    if (billDueDate == null || billExpiry == null || billMonth == null) {
+      showSnack(
+        'Please select a violation to generate bill dates first.',
+        Colors.red,
+      );
+      return;
+    }
 
-        if (amount == null || lateFee == null) {
-          showSnack('Amount or late fee is not valid', Colors.red);
-          return;
-        }
+    if (amount == null || lateFee == null) {
+      showSnack('Amount or late fee is not valid', Colors.red);
+      return;
+    }
 
-        try {
-          print('Amount: $amount');
-          print('Late Fee: $lateFee');
-          print('Consumer Number: ${consumerNoController.text.trim()}');
-          print('Due Date: ${DateFormat('yyyyMMdd').format(billDueDate!)}');
+    try {
+      print('Amount: $amount');
+      print('Late Fee: $lateFee');
+      print('Consumer Number: ${consumerNoController.text.trim()}');
+      print('Due Date: ${DateFormat('yyyyMMdd').format(billDueDate!)}');
 
-          await billController.createBill(
-            amount: amount,
-            lateFeeAmount: lateFee,
-            consumerNumber: consumerNoController.text.trim(),
-            dueDate: DateFormat('yyyyMMdd').format(billDueDate!),
-            expDate: DateFormat('yyyyMMdd').format(billExpiry!),
-            billingMonth: DateFormat('yyMM').format(billMonth!),
-            email: "xyz@email.com",
-            cellNumber: consumerPhoneNoController.text.trim(),
-            consumerDetail: consumerDetailController.text.trim(),
-            referenceInfo: referenceNoController.text.trim(),
-            reserved: serviceController.text.trim(),
-          );
+      await billController.createBill(
+        amount: amount,
+        lateFeeAmount: lateFee,
+        consumerNumber: consumerNoController.text.trim(),
+        dueDate: DateFormat('yyyyMMdd').format(billDueDate!),
+        expDate: DateFormat('yyyyMMdd').format(billExpiry!),
+        billingMonth: DateFormat('yyMM').format(billMonth!),
+        email: "xyz@email.com",
+        cellNumber: consumerPhoneNoController.text.trim(),
+        consumerDetail: consumerDetailController.text.trim(),
+        referenceInfo: referenceNoController.text.trim(),
+        reserved: serviceController.text.trim(),
+      );
 
-          if (action == 'Send Challan') {
-            consumerNoController.clear();
-            referenceNoController.clear();
-            consumerDetailController.clear();
-            amountPKRController.clear();
-            lateFeePKRController.clear();
-            consumerPhoneNoController.clear();
-            consumerEmailController.clear();
-            serviceController.clear();
+      if (action == 'Send Challan') {
+        consumerNoController.clear();
+        referenceNoController.clear();
+        consumerDetailController.clear();
+        amountPKRController.clear();
+        lateFeePKRController.clear();
+        consumerPhoneNoController.clear();
+        consumerEmailController.clear();
+        serviceController.clear();
 
-            setState(() {
-              billDueDate = null;
-              billExpiry = null;
-              billMonth = null;
-              billDueDateController.clear();
-              billExpiryController.clear();
-            });
+        setState(() {
+          billDueDate = null;
+          billExpiry = null;
+          billMonth = null;
+          billDueDateController.clear();
+          billExpiryController.clear();
+        });
 
-            showSnack('Challan successfully added.', Colors.green);
-          }
-        } catch (e) {
-          showSnack('Error: $e', Colors.red);
-        }
-      };
+        showSnack('Challan successfully added.', Colors.green);
+      }
+    } catch (e) {
+      showSnack('Error: $e', Colors.red);
+    }
+  };
 
   void showSnack(String msg, [Color color = Colors.black]) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: color),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
   }
 }
 

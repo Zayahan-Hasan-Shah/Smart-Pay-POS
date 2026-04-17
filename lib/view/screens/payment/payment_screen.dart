@@ -3,6 +3,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pos/core/app_names.dart';
+import 'package:pos/core/utils/app_assets.dart';
+import 'package:pos/view/components/common/custom_appbar.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:usb_serial/transaction.dart';
 import 'package:usb_serial/usb_serial.dart';
 
@@ -188,38 +191,57 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Payment Screen'), centerTitle: true),
-        body: Center(
-          child: Column(
-            children: <Widget>[
-              Center(
-                child: FractionallyElevatedButton(
-                  onTap:
-                      _port == null
-                          ? null
-                          : () async {
-                            await _sendISO8583Message();
-                          },
-                  child: TitleText(
-                    title: "Proceed",
-                    color: AppColors.white,
-                    fontSize: 20,
-                    weight: FontWeight.w700,
-                  ),
-                ),
+    return Scaffold(
+      // extendBody: true,
+        appBar: CustomAppBar(),
+        // AppBar(
+        //   backgroundColor: AppColors.primaryColor,
+        //   title: Text(
+        //     'PAYMENT',
+        //     style: TextStyle(
+        //       color: AppColors.white,
+        //       fontSize: 22,
+        //       fontWeight: FontWeight.w500,
+        //     ),
+        //   ),
+        //   centerTitle: false,
+        // ),
+        body: Column(
+          // mainAxisAlignment: MainAxisAlignment.center,
+          // crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(height: 12.h),
+            Center(
+              child: Image.asset(
+                AssetsPath.appLogo,
+                width: MediaQuery.of(context).size.height * 0.4,
               ),
-              Text('Status: $_status'),
-              Text(
-                "Result Data",
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              // ..._serialData,
-            ],
-          ),
+            ),
+            SizedBox(height: 4.h),
+            FractionallyElevatedButton(
+              onTap:
+                  _port == null
+                      ? null
+                      : () async {
+                        await _sendISO8583Message();
+                      },
+              title: 'Proceed',
+              // TitleText(
+              //   title: "PROCEED",
+              //   color: AppColors.white,
+              //   fontSize: 13,
+              //   weight: FontWeight.w700,
+              // ),
+            ),
+            SizedBox(height: 2.h),
+
+            Text('Status: $_status', style: TextStyle(color: Colors.black54)),
+            SizedBox(height: 2.h),
+            Text("Result Data", style: Theme.of(context).textTheme.titleLarge),
+            // ..._serialData,
+          ],
         ),
-      ),
+      
     );
   }
 }

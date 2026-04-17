@@ -8,7 +8,13 @@ class HeadingText extends StatelessWidget {
   final double? fontSize;
   final EdgeInsetsGeometry? padding;
   final Color? color;
-  const HeadingText({super.key, required this.text, this.fontSize, this.padding, this.color});
+  const HeadingText({
+    super.key,
+    required this.text,
+    this.fontSize,
+    this.padding,
+    this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +24,7 @@ class HeadingText extends StatelessWidget {
         title: text,
         fontSize: fontSize ?? 14,
         weight: FontWeight.w600,
-        color: color ?? AppColors.black,
+        color: color ?? Colors.black54,
       ),
     );
   }
