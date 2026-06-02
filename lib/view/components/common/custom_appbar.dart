@@ -1,9 +1,6 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:pos/core/utils/app_assets.dart';
-import 'package:pos/view/components/common/title_text.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
 
 import '../../../core/utils/app_colors.dart';
 

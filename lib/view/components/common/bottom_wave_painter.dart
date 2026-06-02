@@ -49,7 +49,7 @@ class BottomWavePainter extends CustomPainter {
     final paint2 = Paint()
       ..shader = LinearGradient(
         colors: [
-          Colors.white.withOpacity(0.3),
+          Colors.white.withValues(alpha: 0.3),
           Colors.transparent,
         ],
         begin: Alignment.topCenter,

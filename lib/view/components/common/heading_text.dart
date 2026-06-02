@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pos/view/components/common/title_text.dart';
 
-import '../../../core/utils/app_colors.dart';
+
 
 class HeadingText extends StatelessWidget {
   final String text;

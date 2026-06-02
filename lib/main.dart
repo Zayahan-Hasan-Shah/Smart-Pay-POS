@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:pos/view/screens/auth/login_screen.dart';
-import 'package:pos/view/screens/bottom_navigation_screens/bill_screens/add_and_update_bill_screen.dart';
-import 'package:pos/view/screens/bottom_navigation_screens/home_screen/home_screen.dart';
-import 'package:pos/view/screens/bottom_navigation_screens/landing_screen.dart';
-import 'package:pos/view/screens/payment/payment_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
-import 'core/app_names.dart';
-import 'core/app_routes.dart';
+import 'core/routing/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +11,11 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  runApp(const MyApp());
+  runApp(
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -27,16 +25,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
-        return GetMaterialApp(
+        return MaterialApp.router(
           title: 'Flutter Demo',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
             useMaterial3: true,
           ),
-          debugShowCheckedModeBanner: false, // Hide debug banner
-          initialRoute: RouteNames.splashScreen, // Set initial route to login
-          getPages: AppRoutes.routes,
-          home: LoginScreen(),
+          debugShowCheckedModeBanner: false,
+          routerConfig: appRouter,
         );
       },
     );

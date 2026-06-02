@@ -13,8 +13,8 @@ class TitleText extends StatelessWidget {
   final TextAlign? textAlign;
   final bool? isUnderLine;
 
-  TitleText({
-    Key? key,
+  const TitleText({
+    super.key,
     required this.title,
     this.style,
     this.fontSize,
@@ -22,7 +22,7 @@ class TitleText extends StatelessWidget {
     this.color,
     this.isUnderLine,
     this.textAlign,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

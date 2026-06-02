@@ -6,8 +6,8 @@ import 'package:pos/view/components/common/title_text.dart';
 import '../../../core/utils/app_colors.dart';
 
 class ClearButton extends StatelessWidget {
-  var title;
-   ClearButton({super.key, required this.onPressed, this.title});
+  final title;
+  const ClearButton({super.key, required this.onPressed, this.title});
 
   final Function() onPressed;
 
