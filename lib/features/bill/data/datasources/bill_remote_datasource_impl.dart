@@ -4,16 +4,22 @@ import '../../../../core/utils/urls.dart';
 import '../models/get_bill_model.dart';
 import '../models/create_bill_model.dart';
 import 'bill_remote_datasource.dart';
+import '../../../../core/utils/app_logger.dart';
 
 class BillRemoteDataSourceImpl implements BillRemoteDataSource {
   @override
   Future<List<GetBillsModel>> getBill(String consumerNumber) async {
     final bodySent = {"Key": "consumer_Number", "Value": consumerNumber};
-    final response = await http.post(Uri.parse(URLS.getBillUrl), body: bodySent);
-
+    AppLogger.info('Fetching bill for consumer: $consumerNumber', tag: 'API_GET_BILL');
+    AppLogger.info('Request URL: ${URLS.getBillUrl} | Body: $bodySent', tag: 'API_GET_BILL');
+    // final response = await http.post(Uri.parse(URLS.getBillUrl), body: bodySent);
+    final url = Uri.parse('${URLS.getBillUrl}?ConsumerNo=$consumerNumber');
+    final response = await http.get(url);
+    AppLogger.info('Response Status: ${response.statusCode} | Body: ${response.body}', tag: 'API_GET_BILL');
     if (response.statusCode == 200 && response.body.isNotEmpty) {
       return getBillsModelFromJson(response.body);
     } else {
+      AppLogger.error('Failed to fetch bills. Status: ${response.statusCode}', tag: 'API_GET_BILL');
       throw Exception('Failed to fetch bills');
     }
   }
@@ -48,6 +54,9 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
       "PStatus": "4",
     };
 
+    AppLogger.info('Creating bill for consumer: $consumerNumber', tag: 'API_CREATE_BILL');
+    AppLogger.info('Request URL: ${URLS.createBillUrl} | Body: ${jsonEncode(bodySent)}', tag: 'API_CREATE_BILL');
+    
     final response = await http.post(
       Uri.parse(URLS.createBillUrl),
       headers: {
@@ -57,9 +66,12 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
       body: jsonEncode(bodySent),
     );
 
+    AppLogger.info('Response Status: ${response.statusCode} | Body: ${response.body}', tag: 'API_CREATE_BILL');
+
     if (response.statusCode == 200 && response.body.isNotEmpty) {
       return createBillModelFromJson(response.body);
     } else {
+      AppLogger.error('Server Error while creating bill: ${response.statusCode}', tag: 'API_CREATE_BILL');
       throw Exception('Server Error: ${response.statusCode}');
     }
   }

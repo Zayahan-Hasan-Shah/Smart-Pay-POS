@@ -55,12 +55,16 @@ class BillNotifier extends StateNotifier<BillState> {
 
   BillNotifier(this.repository) : super(BillState());
 
+  void clearBill() {
+    state = BillState();
+  }
+
   Future<List<GetBillsModel>?> getBill(String consumerNumber) async {
     state = state.copyWith(isLoading: true);
     try {
       final response = await repository.getBill(consumerNumber);
       if (response.isEmpty) {
-        SnackbarService.showError("Invalid Consumer", "No Consumer Found");
+        SnackbarService.showError("Failed", "Bill Not Found");
         state = state.copyWith(isLoading: false, isEmpty: true, getBillResponse: response);
         return response;
       }

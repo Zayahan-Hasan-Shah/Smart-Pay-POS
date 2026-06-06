@@ -42,7 +42,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       const Duration(seconds: 3),
       () {
         if (mounted) {
-          context.go(RouteNames.loginScreen);
+          context.go(RouteNames.homeScreen);
         }
       },
     );

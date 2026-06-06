@@ -5,6 +5,7 @@ class URLS{
   // static const String baseUrl = "http://182.180.187.115:6065/";
   // static const String CreateBillBaseUrl = 'http://85.245.173.173:6065/';
 
-  static const String getBillUrl = "${baseUrl}Tran/GetR";
+  static const String getBillUrl = "${baseUrl}Bill/LatestBill";
   static const String createBillUrl = "${baseUrl}Bill/Push";
+  static const String paymentUrl = '${baseUrl}Bill/Payment';
 } 

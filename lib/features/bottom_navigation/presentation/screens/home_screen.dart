@@ -1,5 +1,7 @@
+import 'dart:developer';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/routing/app_router.dart';
@@ -29,21 +31,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
+          Expanded(
+            flex: 2,
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 2,
             ),
           ),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.black,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              maxLines: 3,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -51,9 +63,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  Widget _buildIconDetail(String title, String value, IconData icon) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 16, color: Colors.black54),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final billState = ref.watch(billProvider);
+    log("bill state: ${billState.getBillResponse}");
     final billNotifier = ref.read(billProvider.notifier);
 
     return GestureDetector(
@@ -63,43 +114,71 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         // backgroundColor: AppColors.white,
         bottomNavigationBar: SizedBox(
           height: 100,
+          width: double.infinity,
           child: CustomPaint(painter: BottomWavePainter()),
         ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton:
+            (!billState.isEmpty &&
+                    billState.getBillResponse != null &&
+                    billState.getBillResponse!.isNotEmpty)
+                ? FloatingActionButton.extended(
+                  onPressed: () {
+                    consumerNumberController.clear();
+                    billNotifier.clearBill();
+                  },
+                  backgroundColor: AppColors.primaryColor,
+                  label: const Text(
+                    "Cancel",
+                    style: TextStyle(color: Colors.white, fontSize: 13),
+                  ),
+                  icon: const Icon(Icons.clear, color: Colors.white),
+                )
+                : null,
         body: SingleChildScrollView(
           child: Column(
             children: [
               // Main content
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                // mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(height: 15.h),
-                  // Center(child: Image.asset(AssetsPath.appLogo, height: 100)),
-                  // SizedBox(height: 9.h),
-                  HeadingText(text: 'Consumer Number'),
+              if (billState.isEmpty ||
+                  billState.getBillResponse == null ||
+                  billState.getBillResponse!.isEmpty)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  // mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 15.h),
+                    // Center(child: Image.asset(AssetsPath.appLogo, height: 100)),
+                    // SizedBox(height: 9.h),
+                    HeadingText(text: 'Consumer Number'),
 
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: CustomTextField(
-                      cursorColor: Colors.green.shade600,
-                      hintText: 'Consumer Number',
-                      controller: consumerNumberController,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: CustomTextField(
+                        cursorColor: Colors.green.shade600,
+                        hintText: 'Consumer Number',
+                        controller: consumerNumberController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        textColor: Colors.green.shade600,
+                        borderColor: Colors.green.shade600,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 10),
-                  Center(
-                    child: loginButton(
-                      context: context,
-                      onTap: () async {
-                        await billNotifier.getBill(
-                          consumerNumberController.text,
-                        );
-                      },
-                      title: 'Fetch',
+                    SizedBox(height: 10),
+                    Center(
+                      child: loginButton(
+                        context: context,
+                        onTap: () async {
+                          await billNotifier.getBill(
+                            consumerNumberController.text,
+                          );
+                        },
+                        title: 'Fetch',
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
 
               SizedBox(height: 20),
 
@@ -125,137 +204,364 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                 ),
-              if (!billState.isEmpty && billState.getBillResponse != null && billState.getBillResponse!.isNotEmpty)
+              if (!billState.isEmpty &&
+                  billState.getBillResponse != null &&
+                  billState.getBillResponse!.isNotEmpty)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0,
-                                  vertical: 8.0,
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Top Header Gradient
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 16,
+                              ),
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    AppColors.darkGreen,
+                                    AppColors.lightGreen,
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                 ),
-                                child: Card(
-                                  elevation: 4,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(13),
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(20),
+                                  topRight: Radius.circular(20),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(
+                                      Icons.receipt_long,
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                  child: Column(
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          billState
+                                                  .getBillResponse?[0]
+                                                  .Institution
+                                                  ?.toString() ??
+                                              "Institute",
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          maxLines: 4,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          "Ref.: ${billState.getBillResponse?[0].ReferenceInfo?.toString() ?? ''}",
+                                          style: TextStyle(
+                                            color: Colors.white.withOpacity(
+                                              0.8,
+                                            ),
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          (billState
+                                                      .getBillResponse?[0]
+                                                      .PaymentStatus
+                                                      ?.toString()
+                                                      .toLowerCase() ==
+                                                  'paid')
+                                              ? Colors.greenAccent.withOpacity(
+                                                0.2,
+                                              )
+                                              : Colors.redAccent.withOpacity(
+                                                0.2,
+                                              ),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color:
+                                            (billState
+                                                        .getBillResponse?[0]
+                                                        .PaymentStatus
+                                                        ?.toString()
+                                                        .toLowerCase() ==
+                                                    'paid')
+                                                ? Colors.greenAccent
+                                                : Colors.redAccent,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      billState
+                                              .getBillResponse?[0]
+                                              .PaymentStatus
+                                              ?.toString()
+                                              .toUpperCase() ??
+                                          "UNKNOWN",
+                                      style: TextStyle(
+                                        color:
+                                            (billState
+                                                        .getBillResponse?[0]
+                                                        .PaymentStatus
+                                                        ?.toString()
+                                                        .toLowerCase() ==
+                                                    'paid')
+                                                ? Colors.greenAccent
+                                                : Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            // Body Content
+                            Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Consumer Info
+                                  Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Container(
-                                        decoration: const BoxDecoration(
-                                          gradient: LinearGradient(
-                                            colors: [
-                                              AppColors.darkGreen,
-                                              AppColors.lightGreen,
-                                              // Color(0xFFE8F5E9),
-                                            ],
-                                          ),
-                                          borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(13),
-                                            topRight: Radius.circular(13),
-                                          ),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(12.0),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              const Text(
-                                                "Consumer No",
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                              Text(
-                                                billState.getBillResponse?[0].infoNo?.toString() ?? "",
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                      const Icon(
+                                        Icons.person,
+                                        color: Colors.grey,
+                                        size: 20,
                                       ),
-                                      Container(
-                                        decoration: const BoxDecoration(
-                                          color: AppColors.white,
-                                          borderRadius: BorderRadius.only(
-                                            bottomLeft: Radius.circular(13),
-                                            bottomRight: Radius.circular(13),
-                                          ),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: Column(
-                                            children: [
-                                              _buildDetailRow(
-                                                "Institute",
-                                                billState.getBillResponse?[0].tid?.toString() ?? "",
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              billState
+                                                      .getBillResponse?[0]
+                                                      .ConsumerDetail
+                                                      ?.toString() ??
+                                                  "",
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black87,
                                               ),
-                                              _buildDetailRow(
-                                                "Consumer Name",
-                                                billState.getBillResponse?[0].rfu4?.toString() ?? "",
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              "Consumer #: ${billState.getBillResponse?[0].ConsumerNumber?.toString() ?? ''}",
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.black54,
                                               ),
-                                              _buildDetailRow(
-                                                "Invoice No",
-                                                billState.getBillResponse?[0].invoiceNo?.toString() ?? "",
-                                              ),
-                                              _buildDetailRow(
-                                                "Billing Month",
-                                                billState.getBillResponse?[0].trTime?.toString() ?? "",
-                                              ),
-                                              _buildDetailRow(
-                                                "Status",
-                                                billState.getBillResponse?[0].rfu5?.toString() ?? "",
-                                              ),
-                                              _buildDetailRow(
-                                                "Currency",
-                                                billState.getBillResponse?[0].trCurrency?.toString() ?? "",
-                                              ),
-                                              _buildDetailRow(
-                                                "Amount",
-                                                billState.getBillResponse?[0].trtAmt?.toString() ?? "",
-                                              ),
-                                              _buildDetailRow(
-                                                "Due Date",
-                                                billState.getBillResponse?[0].trDate?.toString().substring(0, 10) ?? "",
-                                              ),
-                                              _buildDetailRow(
-                                                "Late pay fee",
-                                                billState.getBillResponse?[0].troAmt?.toString() ?? "",
-                                              ),
-                                              _buildDetailRow(
-                                                "Pay after due date",
-                                                billState.getBillResponse?[0].cardTAmt?.toString() ?? "",
-                                              ),
-                                              SizedBox(height: 20),
-                                              Center(
-                                                child: FractionallyElevatedButton(
-                                                  onTap: () async {
-                                                    if (billState.getBillResponse?.isNotEmpty == true) {
-                                                      var temp = billState.getBillResponse![0].trtAmt?.split(".") ?? ["0"];
-                                                      var amount = temp[0];
-                                                      context.push(RouteNames.paymentScreen, extra: amount);
-                                                    }
-                                                  },
-                                                  title: 'Pay',
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
+
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 16),
+                                    child: Divider(
+                                      color: Colors.black12,
+                                      thickness: 1,
+                                    ),
+                                  ),
+
+                                  // Grid of details
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _buildIconDetail(
+                                          "Month",
+                                          billState
+                                                  .getBillResponse?[0]
+                                                  .BillingMonth
+                                                  ?.toString() ??
+                                              "",
+                                          Icons.calendar_month,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: _buildIconDetail(
+                                          "Due Date",
+                                          (billState.getBillResponse?[0].DueDate1
+                                                              ?.toString() ??
+                                                          "")
+                                                      .length >=
+                                                  10
+                                              ? billState
+                                                  .getBillResponse![0]
+                                                  .DueDate1
+                                                  .toString()
+                                                  .substring(0, 10)
+                                              : billState
+                                                      .getBillResponse?[0]
+                                                      .DueDate1
+                                                      ?.toString() ??
+                                                  "",
+                                          Icons.event,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+
+                                  // Amount Highlight Box
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF8FAF9),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: AppColors.primaryColor
+                                            .withOpacity(0.2),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        const Text(
+                                          "AMOUNT DUE",
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.black54,
+                                            letterSpacing: 1.2,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              billState
+                                                      .getBillResponse?[0]
+                                                      .Currency
+                                                      ?.toString() ??
+                                                  "PKR",
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: AppColors.primaryColor,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              billState
+                                                      .getBillResponse?[0]
+                                                      .BillAmount
+                                                      ?.toString() ??
+                                                  "0.00",
+                                              style: TextStyle(
+                                                fontSize: 32,
+                                                fontWeight: FontWeight.w900,
+                                                color: AppColors.primaryColor,
+                                                height: 1.0,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  const SizedBox(height: 24),
+
+                                  Center(
+                                    child: FractionallyElevatedButton(
+                                      onTap: () async {
+                                        if (billState
+                                                .getBillResponse
+                                                ?.isNotEmpty ==
+                                            true) {
+                                          var temp =
+                                              billState
+                                                  .getBillResponse![0]
+                                                  .BillAmount
+                                                  ?.toString()
+                                                  .split(".") ??
+                                              ["0"];
+                                          var amount = temp[0];
+                                          var billId =
+                                              billState
+                                                  .getBillResponse![0]
+                                                  .BillId
+                                                  ?.toString() ??
+                                              "";
+                                          var consumerNumber =
+                                              billState
+                                                  .getBillResponse![0]
+                                                  .ConsumerNumber
+                                                  ?.toString() ??
+                                              "";
+
+                                          context.push(
+                                            RouteNames.paymentScreen,
+                                            extra: {
+                                              "amount": amount,
+                                              "billId": billId,
+                                              "consumerNumber": consumerNumber,
+                                            },
+                                          );
+                                        }
+                                      },
+                                      title: 'PROCEED TO PAY',
+                                    ),
+                                  ),
+                                ],
                               ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
             ],

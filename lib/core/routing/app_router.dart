@@ -7,6 +7,20 @@ import '../../features/bottom_navigation/presentation/screens/home_screen.dart';
 import '../../features/on_boarding/presentation/screens/splash_screen.dart';
 import '../../features/payment/presentation/screens/payment_screen.dart';
 
+import '../utils/app_logger.dart';
+
+class AppRouterObserver extends NavigatorObserver {
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    AppLogger.info('Pushed route: ${route.settings.name}', tag: 'NAVIGATION');
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    AppLogger.info('Popped route: ${route.settings.name}', tag: 'NAVIGATION');
+  }
+}
+
 class RouteNames {
   static const splashScreen = '/';
   static const loginScreen = '/login-screen';
@@ -21,6 +35,7 @@ final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 final GoRouter appRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
   initialLocation: RouteNames.splashScreen,
+  observers: [AppRouterObserver()],
   routes: [
     GoRoute(
       path: RouteNames.splashScreen,
@@ -37,8 +52,8 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: RouteNames.paymentScreen,
       builder: (context, state) {
-        final amount = state.extra; // Access passed data via extra
-        return PaymentScreen(amount: amount);
+        final paymentData = state.extra; // Access passed Map via extra
+        return PaymentScreen(paymentData: paymentData);
       },
     ),
     GoRoute(
