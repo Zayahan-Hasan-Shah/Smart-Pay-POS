@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pos/core/utils/app_assets.dart';
-
+import '../../../core/routing/app_router.dart';
 import '../../../core/utils/app_colors.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -25,6 +26,46 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
 
       actions: [
+        IconButton(
+          icon: const Icon(Icons.settings, color: Colors.black26),
+          onPressed: () {
+            final TextEditingController passwordController = TextEditingController();
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text("Enter Password"),
+                  content: TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      hintText: "Password",
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text("Cancel"),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        if (passwordController.text == "admin123") {
+                          Navigator.of(context).pop();
+                          context.push(RouteNames.adminSettingsScreen);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Incorrect Password")),
+                          );
+                        }
+                      },
+                      child: const Text("Confirm"),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
         IconButton(
           icon: Icon(Icons.logout, color: Colors.green.shade600),
           onPressed: () {

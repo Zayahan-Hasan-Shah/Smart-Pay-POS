@@ -6,6 +6,7 @@ import '../../features/bottom_navigation/presentation/screens/home_screen.dart';
 
 import '../../features/on_boarding/presentation/screens/splash_screen.dart';
 import '../../features/payment/presentation/screens/payment_screen.dart';
+import '../../features/admin/presentation/screens/admin_settings_screen.dart';
 
 import '../utils/app_logger.dart';
 
@@ -27,6 +28,7 @@ class RouteNames {
   static const homeScreen = '/home-screen';
   static const paymentScreen = '/payment-screen';
   static const addUpdateScreen = '/addupdate-screen';
+  static const adminSettingsScreen = '/admin-settings';
 
 }
 
@@ -60,6 +62,9 @@ final GoRouter appRouter = GoRouter(
       path: RouteNames.addUpdateScreen,
       builder: (context, state) => const AddAndUpdateBillScreen(),
     ),
-
+    GoRoute(
+      path: RouteNames.adminSettingsScreen,
+      builder: (context, state) => const AdminSettingsScreen(),
+    ),
   ],
 );

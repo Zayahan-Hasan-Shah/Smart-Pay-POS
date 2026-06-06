@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../../../core/utils/urls.dart';
+import '../../../../core/network/custom_http_client.dart';
 import '../models/get_bill_model.dart';
 import '../models/create_bill_model.dart';
 import 'bill_remote_datasource.dart';
@@ -12,9 +13,12 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
     final bodySent = {"Key": "consumer_Number", "Value": consumerNumber};
     AppLogger.info('Fetching bill for consumer: $consumerNumber', tag: 'API_GET_BILL');
     AppLogger.info('Request URL: ${URLS.getBillUrl} | Body: $bodySent', tag: 'API_GET_BILL');
-    // final response = await http.post(Uri.parse(URLS.getBillUrl), body: bodySent);
+    
     final url = Uri.parse('${URLS.getBillUrl}?ConsumerNo=$consumerNumber');
-    final response = await http.get(url);
+    final client = await CustomHttpClient.getClient();
+    final response = await client.get(url);
+    client.close();
+    
     AppLogger.info('Response Status: ${response.statusCode} | Body: ${response.body}', tag: 'API_GET_BILL');
     if (response.statusCode == 200 && response.body.isNotEmpty) {
       return getBillsModelFromJson(response.body);
@@ -57,7 +61,8 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
     AppLogger.info('Creating bill for consumer: $consumerNumber', tag: 'API_CREATE_BILL');
     AppLogger.info('Request URL: ${URLS.createBillUrl} | Body: ${jsonEncode(bodySent)}', tag: 'API_CREATE_BILL');
     
-    final response = await http.post(
+    final client = await CustomHttpClient.getClient();
+    final response = await client.post(
       Uri.parse(URLS.createBillUrl),
       headers: {
         "Content-Type": "application/json",
@@ -65,6 +70,7 @@ class BillRemoteDataSourceImpl implements BillRemoteDataSource {
       },
       body: jsonEncode(bodySent),
     );
+    client.close();
 
     AppLogger.info('Response Status: ${response.statusCode} | Body: ${response.body}', tag: 'API_CREATE_BILL');
 

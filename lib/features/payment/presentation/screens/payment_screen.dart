@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
-import 'dart:io';
+import '../../../../core/network/custom_http_client.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -241,11 +241,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       AppLogger.info('Sending Payment Success payload: $payload', tag: 'API_PAYMENT_SUCCESS');
 
-      await http.post(
+      final client = await CustomHttpClient.getClient();
+      await client.post(
         Uri.parse(URLS.paymentUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(payload)
       );
+      client.close();
 
       AppLogger.info('Payment Success API called', tag: 'API_PAYMENT_SUCCESS');
       

@@ -26,43 +26,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   TextEditingController consumerNumberController = TextEditingController();
 
-  Widget _buildDetailRow(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-              maxLines: 2,
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              value,
-              maxLines: 3,
-              textAlign: TextAlign.right,
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildIconDetail(String title, String value, IconData icon) {
     return Row(
       children: [
@@ -118,23 +81,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: CustomPaint(painter: BottomWavePainter()),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton:
-            (!billState.isEmpty &&
-                    billState.getBillResponse != null &&
-                    billState.getBillResponse!.isNotEmpty)
-                ? FloatingActionButton.extended(
-                  onPressed: () {
-                    consumerNumberController.clear();
-                    billNotifier.clearBill();
-                  },
-                  backgroundColor: AppColors.primaryColor,
-                  label: const Text(
-                    "Cancel",
-                    style: TextStyle(color: Colors.white, fontSize: 13),
-                  ),
-                  icon: const Icon(Icons.clear, color: Colors.white),
-                )
-                : null,
+        // floatingActionButton:
+            
         body: SingleChildScrollView(
           child: Column(
             children: [
@@ -553,6 +501,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         }
                                       },
                                       title: 'PROCEED TO PAY',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Center(
+                                    child: FloatingActionButton.extended(
+                                      onPressed: () {
+                                        consumerNumberController.clear();
+                                        billNotifier.clearBill();
+                                      },
+                                      backgroundColor: AppColors.primaryColor,
+                                      label: const Text(
+                                        "Cancel",
+                                        style: TextStyle(color: Colors.white, fontSize: 13),
+                                      ),
+                                      icon: const Icon(Icons.clear, color: Colors.white),
                                     ),
                                   ),
                                 ],

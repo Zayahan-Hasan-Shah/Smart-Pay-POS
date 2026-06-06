@@ -1,11 +1,24 @@
-class URLS{
-  // static const String baseUrl = "http://207.180.248.203:9091/";
-  // static const String baseUrl = "http://85.245.83.2:6065/";
-  static const String baseUrl = "http://192.168.100.197:6065/";
-  // static const String baseUrl = "http://182.180.187.115:6065/";
-  // static const String CreateBillBaseUrl = 'http://85.245.173.173:6065/';
+import 'package:shared_preferences/shared_preferences.dart';
 
-  static const String getBillUrl = "${baseUrl}Bill/LatestBill";
-  static const String createBillUrl = "${baseUrl}Bill/Push";
-  static const String paymentUrl = '${baseUrl}Bill/Payment';
-} 
+class URLS {
+  static String baseUrl = "http://192.168.100.197:6065/";
+
+  static String get getBillUrl => "${baseUrl}Bill/LatestBill";
+  static String get paymentUrl => "${baseUrl}Bill/Payment";
+  static String get createBillUrl => "${baseUrl}Bill/Push";
+  // static String get paymentSuccessUrl => "${baseUrl}Bill/PaymentSuccess";
+
+  static Future<void> initBaseUrl() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedUrl = prefs.getString('saved_base_url');
+    if (savedUrl != null && savedUrl.isNotEmpty) {
+      baseUrl = savedUrl;
+    }
+  }
+
+  static Future<void> updateBaseUrl(String newUrl) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('saved_base_url', newUrl);
+    baseUrl = newUrl;
+  }
+}
