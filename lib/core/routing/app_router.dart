@@ -58,10 +58,10 @@ final GoRouter appRouter = GoRouter(
         return PaymentScreen(paymentData: paymentData);
       },
     ),
-    GoRoute(
-      path: RouteNames.addUpdateScreen,
-      builder: (context, state) => const AddAndUpdateBillScreen(),
-    ),
+    // GoRoute(
+    //   path: RouteNames.addUpdateScreen,
+    //   builder: (context, state) => const AddAndUpdateBillScreen(),
+    // ),
     GoRoute(
       path: RouteNames.adminSettingsScreen,
       builder: (context, state) => const AdminSettingsScreen(),

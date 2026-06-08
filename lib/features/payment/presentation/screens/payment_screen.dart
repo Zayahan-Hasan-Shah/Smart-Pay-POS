@@ -11,7 +11,8 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:usb_serial/transaction.dart';
 import 'package:usb_serial/usb_serial.dart';
-
+import 'package:permission_handler/permission_handler.dart';
+import '../../../../core/services/bluetooth_server_service.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/utils/snackbar_service.dart';
 import '../../../../core/utils/app_assets.dart';
@@ -20,7 +21,7 @@ import '../../../../view/components/common/custom_appbar.dart';
 import '../../../../view/components/common/fractionally_elevated_button.dart';
 import '../../../../core/utils/app_logger.dart';
 
-enum ConnectionMode { usb, wifi }
+enum ConnectionMode { usb, wifi, bluetooth }
 
 class PaymentScreen extends StatefulWidget {
   final dynamic paymentData; // Map containing amount, billId, consumerNumber
@@ -48,6 +49,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
   String _savedIp = "192.168.1.100";
   int _savedPort = 8080;
 
+  // Bluetooth State
+  BluetoothServerService? _bluetoothServerService;
+  bool _isBtConnected = false;
+
   // POS Parsed Data
   String? _posInvoiceNo;
   String? _posCardNo;
@@ -66,7 +71,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
       _savedIp = prefs.getString('wifi_ip') ?? "192.168.1.100";
       _savedPort = prefs.getInt('wifi_port') ?? 8080;
       final modeIndex = prefs.getInt('connection_mode') ?? 0;
-      // Ensure modeIndex is valid for the current enum values
       if (modeIndex >= ConnectionMode.values.length) {
         _currentMode = ConnectionMode.usb;
       } else {
@@ -74,6 +78,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       }
       _status = "Ready (${_currentMode.name})";
     });
+    _handleModeChange();
   }
 
   Future<void> _saveSettings(ConnectionMode mode, String ip, int port) async {
@@ -88,6 +93,54 @@ class _PaymentScreenState extends State<PaymentScreen> {
       _savedPort = port;
       _status = "Ready (${_currentMode.name})";
     });
+    _handleModeChange();
+  }
+
+  void _handleModeChange() {
+    if (_currentMode == ConnectionMode.bluetooth) {
+      _startBluetoothServer();
+    } else {
+      _bluetoothServerService?.dispose();
+      _bluetoothServerService = null;
+      _isBtConnected = false;
+    }
+  }
+
+  Future<void> _startBluetoothServer() async {
+    await Permission.bluetoothConnect.request();
+    await Permission.bluetoothScan.request();
+    await Permission.location.request();
+
+    if (_bluetoothServerService == null) {
+      _bluetoothServerService = BluetoothServerService();
+      _bluetoothServerService!.events.listen((event) {
+        if (event == "CONNECTED") {
+          AppLogger.success("Bluetooth Server: POS Connected!", tag: "BT_SERVER");
+          if (mounted) setState(() {
+            _status = "POS Connected via Bluetooth!";
+            _isBtConnected = true;
+          });
+        } else if (event == "DISCONNECTED") {
+          AppLogger.info("Bluetooth Server: POS Disconnected", tag: "BT_SERVER");
+          if (mounted) setState(() {
+            _status = "Listening for POS connection...";
+            _isBtConnected = false;
+          });
+        } else if (event is Uint8List) {
+          String respStr = utf8.decode(event);
+          AppLogger.info('Received data from POS (BT): $respStr', tag: 'BT_DATA');
+          _handleResponse(respStr);
+        }
+      });
+    }
+    
+    if (mounted) setState(() => _status = "Starting Bluetooth Server...");
+    bool started = await _bluetoothServerService!.startServer();
+    if (started) {
+      if (mounted) setState(() => _status = "Listening for POS connection...");
+    } else {
+      if (mounted) setState(() => _status = "Failed to start Bluetooth Server");
+    }
   }
 
   void _initUsbListener() {
@@ -312,6 +365,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
         AppLogger.success('Sent payload via WiFi: $message', tag: 'PAYMENT');
         setState(() => _status = "Sent via WiFi. Waiting...");
       }
+      else if (_currentMode == ConnectionMode.bluetooth) {
+        if (!_isBtConnected) throw Exception("POS is not connected. Wait for POS to connect to the app first.");
+        
+        AppLogger.info('Sending payload via Bluetooth Server...', tag: 'PAYMENT');
+        bool sent = await _bluetoothServerService?.sendData(data) ?? false;
+        if (sent) {
+            AppLogger.success('Sent payload via Bluetooth: $message', tag: 'PAYMENT');
+            setState(() => _status = "Sent via Bluetooth. Waiting...");
+        } else {
+            throw Exception("Failed to send data to POS.");
+        }
+      }
     } catch (e) {
       AppLogger.error('Payment Error', error: e, tag: 'PAYMENT_ERR');
       if (mounted) {
@@ -323,10 +388,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
   }
 
-  void _showSettingsDialog() {
+  void _showSettingsDialog() async {
     TextEditingController ipController = TextEditingController(text: _savedIp);
     TextEditingController portController = TextEditingController(text: _savedPort.toString());
     ConnectionMode tempMode = _currentMode;
+
+    if (!mounted) return;
 
     showDialog(
       context: context,
@@ -363,6 +430,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         decoration: const InputDecoration(labelText: 'POS Port'),
                       ),
                     ],
+                    if (tempMode == ConnectionMode.bluetooth)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 16.0),
+                        child: Text(
+                          "Please manually find your mobile's MAC address in Android Settings > About Phone, and enter it into the POS ECR menu.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.bold),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -393,6 +469,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     _usbTransaction?.dispose();
     _port?.close();
     _wifiSocket?.destroy();
+    _bluetoothServerService?.dispose();
     super.dispose();
   }
 
@@ -429,6 +506,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
           ),
           SizedBox(height: 2.h),
           Text('Status: $_status', style: const TextStyle(color: Colors.black54)),
+          if (_currentMode == ConnectionMode.bluetooth)
+            const Padding(
+              padding: EdgeInsets.only(top: 12.0, left: 24, right: 24),
+              child: Text(
+                "Please enter your mobile's MAC address into the POS machine to pair.",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.blueGrey, fontWeight: FontWeight.bold),
+              ),
+            ),
         ],
       ),
     );
