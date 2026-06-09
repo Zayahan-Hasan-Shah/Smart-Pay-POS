@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:http/http.dart' as http;
-import '../../../../core/network/custom_http_client.dart';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -16,7 +15,6 @@ import '../../../../core/services/bluetooth_server_service.dart';
 import '../../../../core/routing/app_router.dart';
 import '../../../../core/utils/snackbar_service.dart';
 import '../../../../core/utils/app_assets.dart';
-import '../../../../core/utils/urls.dart';
 import '../../../../view/components/common/custom_appbar.dart';
 import '../../../../view/components/common/fractionally_elevated_button.dart';
 import '../../../../core/utils/app_logger.dart';
@@ -54,8 +52,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   bool _isBtConnected = false;
 
   // POS Parsed Data
-  String? _posInvoiceNo;
-  String? _posCardNo;
+  Map<String, String> _posReceiptData = {};
 
   @override
   void initState() {
@@ -242,76 +239,32 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   void _handleResponse(String line) {
-    if (line.startsWith("INVOICENO=")) {
-      _posInvoiceNo = line.split("=")[1].trim();
-    }
-    if (line.startsWith("CARDNO=")) {
-      _posCardNo = line.split("=")[1].trim();
+    if (line.contains("=")) {
+      var parts = line.split("=");
+      if (parts.length >= 2) {
+        String key = parts[0].trim();
+        String value = parts.sublist(1).join("=").trim();
+        _posReceiptData[key] = value;
+      }
     }
 
     if (line.contains("Decline")) {
       if (!mounted) return;
-      SnackbarService.showError("Transaction Failed", "Card not issued");
+      SnackbarService.showError("Transaction Failed", "Card declined by POS");
       context.go(RouteNames.homeScreen);
     }
-    if (line.contains("APPROVED")) {
+    
+    if (line.contains("---END---")) {
       if (!mounted) return;
-      _notifyPaymentSuccess();
-    }
-  }
-
-  Future<void> _notifyPaymentSuccess() async {
-    try {
-      String amount = "0";
-      String billId = "";
-      String consumerNumber = "";
       
-      if (widget.paymentData is Map) {
-        amount = widget.paymentData["amount"]?.toString() ?? "0";
-        billId = widget.paymentData["billId"]?.toString() ?? "";
-        consumerNumber = widget.paymentData["consumerNumber"]?.toString() ?? "";
+      if (_posReceiptData["RESPONSE"] == "APPROVED" || _posReceiptData.values.any((v) => v.contains("APPROVED")) || line.contains("APPROVED")) {
+        final receiptPayload = {
+          "paymentData": widget.paymentData,
+          "posData": Map<String, String>.from(_posReceiptData)
+        };
+        context.go(RouteNames.transactionReceiptScreen, extra: receiptPayload);
       } else {
-        amount = widget.paymentData?.toString() ?? "0";
-      }
-
-      String merchantXid = consumerNumber.length >= 4 ? consumerNumber.substring(0, 4) : consumerNumber;
-      String invoice = _posInvoiceNo ?? "unknown";
-      String card = (_posCardNo ?? "unknown").replaceAll("*", "");
-      
-      String transactionId = "${invoice}-${card}";
-      if (transactionId.length > 20) {
-        transactionId = transactionId.substring(0, 20);
-      }
-
-      final payload = {
-        "amount": amount,
-        "billnumber": billId,
-        "merchantXid": merchantXid,
-        "timestamp": DateTime.now().toIso8601String().substring(0, 19),
-        "transactionId": transactionId,
-        "Bank_Mnemonic": "POS"
-      };
-
-      AppLogger.info('Sending Payment Success payload: $payload', tag: 'API_PAYMENT_SUCCESS');
-
-      final client = await CustomHttpClient.getClient();
-      await client.post(
-        Uri.parse(URLS.paymentUrl),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(payload)
-      );
-      client.close();
-
-      AppLogger.info('Payment Success API called', tag: 'API_PAYMENT_SUCCESS');
-      
-      if (mounted) {
-        SnackbarService.showSuccess("Transaction Successful", "Payment logged and accepted.");
-        context.go(RouteNames.homeScreen);
-      }
-    } catch (e) {
-      AppLogger.error('Failed to notify payment success: $e', tag: 'API_PAYMENT_SUCCESS');
-      if (mounted) {
-        SnackbarService.showError("API Error", "Transaction was successful but failed to notify server.");
+        SnackbarService.showError("Transaction Failed", "Transaction was not approved.");
         context.go(RouteNames.homeScreen);
       }
     }
@@ -319,7 +272,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   Future<void> _processPayment() async {
     if (_isProcessing) return;
-    setState(() => _isProcessing = true);
+    setState(() {
+      _isProcessing = true;
+      _posReceiptData.clear();
+    });
 
     String amountStr = "0";
     if (widget.paymentData is Map) {

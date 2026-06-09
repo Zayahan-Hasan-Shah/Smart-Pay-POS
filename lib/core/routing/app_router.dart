@@ -7,6 +7,7 @@ import '../../features/bottom_navigation/presentation/screens/home_screen.dart';
 import '../../features/on_boarding/presentation/screens/splash_screen.dart';
 import '../../features/payment/presentation/screens/payment_screen.dart';
 import '../../features/admin/presentation/screens/admin_settings_screen.dart';
+import '../../features/payment/presentation/screens/transaction_receipt_screen.dart';
 
 import '../utils/app_logger.dart';
 
@@ -27,6 +28,7 @@ class RouteNames {
   static const loginScreen = '/login-screen';
   static const homeScreen = '/home-screen';
   static const paymentScreen = '/payment-screen';
+  static const transactionReceiptScreen = '/transaction-receipt';
   static const addUpdateScreen = '/addupdate-screen';
   static const adminSettingsScreen = '/admin-settings';
 
@@ -56,6 +58,13 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         final paymentData = state.extra; // Access passed Map via extra
         return PaymentScreen(paymentData: paymentData);
+      },
+    ),
+    GoRoute(
+      path: RouteNames.transactionReceiptScreen,
+      builder: (context, state) {
+        final payload = state.extra as Map<String, dynamic>;
+        return TransactionReceiptScreen(payload: payload);
       },
     ),
     // GoRoute(
