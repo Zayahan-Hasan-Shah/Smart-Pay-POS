@@ -45,6 +45,7 @@ final GoRouter appRouter = GoRouter(
       path: RouteNames.splashScreen,
       builder: (context, state) => const SplashScreen(),
     ),
+    // GoRoute(path: RouteNames.paymentScreen, builder: (context, state) => PaymentScreen(),),
     GoRoute(
       path: RouteNames.loginScreen,
       builder: (context, state) => const LoginScreen(),

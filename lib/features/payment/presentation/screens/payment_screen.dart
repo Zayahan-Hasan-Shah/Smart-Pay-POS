@@ -83,7 +83,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     await prefs.setInt('connection_mode', mode.index);
     await prefs.setString('wifi_ip', ip);
     await prefs.setInt('wifi_port', port);
-    
+
     setState(() {
       _currentMode = mode;
       _savedIp = ip;
@@ -112,25 +112,36 @@ class _PaymentScreenState extends State<PaymentScreen> {
       _bluetoothServerService = BluetoothServerService();
       _bluetoothServerService!.events.listen((event) {
         if (event == "CONNECTED") {
-          AppLogger.success("Bluetooth Server: POS Connected!", tag: "BT_SERVER");
-          if (mounted) setState(() {
-            _status = "POS Connected via Bluetooth!";
-            _isBtConnected = true;
-          });
+          AppLogger.success(
+            "Bluetooth Server: POS Connected!",
+            tag: "BT_SERVER",
+          );
+          if (mounted)
+            setState(() {
+              _status = "POS Connected via Bluetooth!";
+              _isBtConnected = true;
+            });
         } else if (event == "DISCONNECTED") {
-          AppLogger.info("Bluetooth Server: POS Disconnected", tag: "BT_SERVER");
-          if (mounted) setState(() {
-            _status = "Listening for POS connection...";
-            _isBtConnected = false;
-          });
+          AppLogger.info(
+            "Bluetooth Server: POS Disconnected",
+            tag: "BT_SERVER",
+          );
+          if (mounted)
+            setState(() {
+              _status = "Listening for POS connection...";
+              _isBtConnected = false;
+            });
         } else if (event is Uint8List) {
           String respStr = utf8.decode(event);
-          AppLogger.info('Received data from POS (BT): $respStr', tag: 'BT_DATA');
+          AppLogger.info(
+            'Received data from POS (BT): $respStr',
+            tag: 'BT_DATA',
+          );
           _handleResponse(respStr);
         }
       });
     }
-    
+
     if (mounted) setState(() => _status = "Starting Bluetooth Server...");
     bool started = await _bluetoothServerService!.startServer();
     if (started) {
@@ -161,10 +172,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
       if (_usbDevice == null) {
         // Try all devices/interfaces until one connects successfully
         for (var device in devices) {
-          AppLogger.info('Trying device: ${device.deviceName}', tag: 'USB_SCAN');
+          AppLogger.info(
+            'Trying device: ${device.deviceName}',
+            tag: 'USB_SCAN',
+          );
           bool success = await _connectToUsb(device);
           if (success) {
-            AppLogger.success('Successfully connected to ${device.deviceName}', tag: 'USB_SCAN');
+            AppLogger.success(
+              'Successfully connected to ${device.deviceName}',
+              tag: 'USB_SCAN',
+            );
             break;
           }
         }
@@ -200,10 +217,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
     try {
       _port = await device.create();
     } catch (e) {
-      AppLogger.error('Device is not a valid Serial port: $e', tag: 'USB_CONNECT');
+      AppLogger.error(
+        'Device is not a valid Serial port: $e',
+        tag: 'USB_CONNECT',
+      );
       if (mounted && _currentMode == ConnectionMode.usb) {
         setState(() => _status = "Error: Not a Serial Device");
-        SnackbarService.showError("Connection Failed", "The connected device is not recognized as a Serial POS.");
+        SnackbarService.showError(
+          "Connection Failed",
+          "The connected device is not recognized as a Serial POS.",
+        );
       }
       return false;
     }
@@ -220,7 +243,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
     await _port!.setDTR(true);
     await _port!.setRTS(true);
-    await _port!.setPortParameters(115200, UsbPort.DATABITS_8, UsbPort.STOPBITS_1, UsbPort.PARITY_NONE);
+    await _port!.setPortParameters(
+      115200,
+      UsbPort.DATABITS_8,
+      UsbPort.STOPBITS_1,
+      UsbPort.PARITY_NONE,
+    );
 
     _usbTransaction = Transaction.stringTerminated(
       _port!.inputStream as Stream<Uint8List>,
@@ -253,18 +281,23 @@ class _PaymentScreenState extends State<PaymentScreen> {
       SnackbarService.showError("Transaction Failed", "Card declined by POS");
       context.go(RouteNames.homeScreen);
     }
-    
+
     if (line.contains("---END---")) {
       if (!mounted) return;
-      
-      if (_posReceiptData["RESPONSE"] == "APPROVED" || _posReceiptData.values.any((v) => v.contains("APPROVED")) || line.contains("APPROVED")) {
+
+      if (_posReceiptData["RESPONSE"] == "APPROVED" ||
+          _posReceiptData.values.any((v) => v.contains("APPROVED")) ||
+          line.contains("APPROVED")) {
         final receiptPayload = {
           "paymentData": widget.paymentData,
-          "posData": Map<String, String>.from(_posReceiptData)
+          "posData": Map<String, String>.from(_posReceiptData),
         };
         context.go(RouteNames.transactionReceiptScreen, extra: receiptPayload);
       } else {
-        SnackbarService.showError("Transaction Failed", "Transaction was not approved.");
+        SnackbarService.showError(
+          "Transaction Failed",
+          "Transaction was not approved.",
+        );
         context.go(RouteNames.homeScreen);
       }
     }
@@ -279,14 +312,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
     String amountStr = "0";
     if (widget.paymentData is Map) {
-      amountStr = (widget.paymentData["amount"]?.toString() ?? "0").padLeft(10, '0');
+      amountStr = (widget.paymentData["amount"]?.toString() ?? "0").padLeft(
+        10,
+        '0',
+      );
     } else {
       amountStr = widget.paymentData.toString().padLeft(10, '0');
     }
 
     String message = "0200${amountStr}00";
     Uint8List data = Uint8List.fromList(message.codeUnits);
-    AppLogger.action('Proceed button tapped. Mode: ${_currentMode.name}', tag: 'PAYMENT');
+    AppLogger.action(
+      'Proceed button tapped. Mode: ${_currentMode.name}',
+      tag: 'PAYMENT',
+    );
 
     try {
       if (_currentMode == ConnectionMode.usb) {
@@ -295,16 +334,25 @@ class _PaymentScreenState extends State<PaymentScreen> {
         await _port!.write(data);
         AppLogger.success('Sent payload via USB: $message', tag: 'PAYMENT');
         setState(() => _status = "Sent via USB. Waiting...");
-      } 
-      else if (_currentMode == ConnectionMode.wifi) {
+      } else if (_currentMode == ConnectionMode.wifi) {
         setState(() => _status = "Connecting to WiFi POS...");
-        AppLogger.info('Connecting to WiFi Socket $_savedIp:$_savedPort', tag: 'WIFI_CONNECT');
-        _wifiSocket = await Socket.connect(_savedIp, _savedPort, timeout: const Duration(seconds: 5));
-        
+        AppLogger.info(
+          'Connecting to WiFi Socket $_savedIp:$_savedPort',
+          tag: 'WIFI_CONNECT',
+        );
+        _wifiSocket = await Socket.connect(
+          _savedIp,
+          _savedPort,
+          timeout: const Duration(seconds: 5),
+        );
+
         _wifiSocket!.listen(
           (Uint8List response) {
             String respStr = utf8.decode(response);
-            AppLogger.info('Received data from POS (WiFi): $respStr', tag: 'WIFI_DATA');
+            AppLogger.info(
+              'Received data from POS (WiFi): $respStr',
+              tag: 'WIFI_DATA',
+            );
             _handleResponse(respStr);
           },
           onError: (error) {
@@ -314,23 +362,32 @@ class _PaymentScreenState extends State<PaymentScreen> {
           onDone: () {
             _wifiSocket?.destroy();
             _wifiSocket = null;
-          }
+            // context.go(RouteNames.homeScreen);
+          },
         );
 
         _wifiSocket!.add(data);
         AppLogger.success('Sent payload via WiFi: $message', tag: 'PAYMENT');
         setState(() => _status = "Sent via WiFi. Waiting...");
-      }
-      else if (_currentMode == ConnectionMode.bluetooth) {
-        if (!_isBtConnected) throw Exception("POS is not connected. Wait for POS to connect to the app first.");
-        
-        AppLogger.info('Sending payload via Bluetooth Server...', tag: 'PAYMENT');
+      } else if (_currentMode == ConnectionMode.bluetooth) {
+        if (!_isBtConnected)
+          throw Exception(
+            "POS is not connected. Wait for POS to connect to the app first.",
+          );
+
+        AppLogger.info(
+          'Sending payload via Bluetooth Server...',
+          tag: 'PAYMENT',
+        );
         bool sent = await _bluetoothServerService?.sendData(data) ?? false;
         if (sent) {
-            AppLogger.success('Sent payload via Bluetooth: $message', tag: 'PAYMENT');
-            setState(() => _status = "Sent via Bluetooth. Waiting...");
+          AppLogger.success(
+            'Sent payload via Bluetooth: $message',
+            tag: 'PAYMENT',
+          );
+          setState(() => _status = "Sent via Bluetooth. Waiting...");
         } else {
-            throw Exception("Failed to send data to POS.");
+          throw Exception("Failed to send data to POS.");
         }
       }
     } catch (e) {
@@ -346,7 +403,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   void _showSettingsDialog() async {
     TextEditingController ipController = TextEditingController(text: _savedIp);
-    TextEditingController portController = TextEditingController(text: _savedPort.toString());
+    TextEditingController portController = TextEditingController(
+      text: _savedPort.toString(),
+    );
     ConnectionMode tempMode = _currentMode;
 
     if (!mounted) return;
@@ -365,9 +424,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     DropdownButton<ConnectionMode>(
                       value: tempMode,
                       isExpanded: true,
-                      items: ConnectionMode.values.map((e) {
-                        return DropdownMenuItem(value: e, child: Text(e.name.toUpperCase()));
-                      }).toList(),
+                      items:
+                          ConnectionMode.values.map((e) {
+                            return DropdownMenuItem(
+                              value: e,
+                              child: Text(e.name.toUpperCase()),
+                            );
+                          }).toList(),
                       onChanged: (val) {
                         setDialogState(() {
                           tempMode = val!;
@@ -378,12 +441,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     if (tempMode == ConnectionMode.wifi) ...[
                       TextField(
                         controller: ipController,
-                        decoration: const InputDecoration(labelText: 'POS IP Address'),
+                        decoration: const InputDecoration(
+                          labelText: 'POS IP Address',
+                        ),
                       ),
                       TextField(
                         controller: portController,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(labelText: 'POS Port'),
+                        decoration: const InputDecoration(
+                          labelText: 'POS Port',
+                        ),
                       ),
                     ],
                     if (tempMode == ConnectionMode.bluetooth)
@@ -392,7 +459,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         child: Text(
                           "Please manually find your mobile's MAC address in Android Settings > About Phone, and enter it into the POS ECR menu.",
                           textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                   ],
@@ -405,16 +476,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    _saveSettings(tempMode, ipController.text, int.tryParse(portController.text) ?? 8080);
+                    _saveSettings(
+                      tempMode,
+                      ipController.text,
+                      int.tryParse(portController.text) ?? 8080,
+                    );
                     Navigator.pop(context);
                   },
                   child: const Text('Save'),
                 ),
               ],
             );
-          }
+          },
         );
-      }
+      },
     );
   }
 
@@ -461,14 +536,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
             title: _isProcessing ? 'Processing...' : 'Proceed',
           ),
           SizedBox(height: 2.h),
-          Text('Status: $_status', style: const TextStyle(color: Colors.black54)),
+          Text(
+            'Status: $_status',
+            style: const TextStyle(color: Colors.black54),
+          ),
           if (_currentMode == ConnectionMode.bluetooth)
             const Padding(
               padding: EdgeInsets.only(top: 12.0, left: 24, right: 24),
               child: Text(
                 "Please enter your mobile's MAC address into the POS machine to pair.",
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.blueGrey, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.blueGrey,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
         ],

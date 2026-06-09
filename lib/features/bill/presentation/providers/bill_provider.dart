@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/utils/snackbar_service.dart';
 import '../../data/datasources/bill_remote_datasource_impl.dart';
@@ -65,10 +67,18 @@ class BillNotifier extends StateNotifier<BillState> {
       final response = await repository.getBill(consumerNumber);
       if (response.isEmpty) {
         SnackbarService.showError("Failed", "Bill Not Found");
-        state = state.copyWith(isLoading: false, isEmpty: true, getBillResponse: response);
+        state = state.copyWith(
+          isLoading: false,
+          isEmpty: true,
+          getBillResponse: response,
+        );
         return response;
       }
-      state = state.copyWith(isLoading: false, isEmpty: false, getBillResponse: response);
+      state = state.copyWith(
+        isLoading: false,
+        isEmpty: false,
+        getBillResponse: response,
+      );
       return response;
     } catch (e) {
       state = state.copyWith(isLoading: false, isEmpty: true);
@@ -104,13 +114,16 @@ class BillNotifier extends StateNotifier<BillState> {
         referenceInfo: referenceInfo,
         reserved: reserved,
       );
-      
+
       state = state.copyWith(billLoader: false, createBillResponse: response);
       SnackbarService.showSuccess("Successful", "Bill Created");
       return response;
     } catch (e) {
       state = state.copyWith(billLoader: false);
-      SnackbarService.showError("Invalid", "Something Went Wrong: ${e.toString()}");
+      SnackbarService.showError(
+        "Invalid",
+        "Something Went Wrong: ${e.toString()}",
+      );
       return null;
     }
   }

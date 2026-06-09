@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pos/core/utils/snackbar_service.dart';
 import '../../../../core/routing/app_router.dart';
 import 'package:pos/view/components/common/bottom_wave_painter.dart';
 import 'package:pos/view/components/common/custom_appbar.dart';
@@ -81,8 +82,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: CustomPaint(painter: BottomWavePainter()),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+
         // floatingActionButton:
-            
         body: SingleChildScrollView(
           child: Column(
             children: [
@@ -152,6 +153,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                 ),
+
+              // bill UI
               if (!billState.isEmpty &&
                   billState.getBillResponse != null &&
                   billState.getBillResponse!.isNotEmpty)
@@ -233,7 +236,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          "Ref.: ${billState.getBillResponse?[0].ReferenceInfo?.toString() ?? ''}",
+                                          "Ref: ${billState.getBillResponse?[0].ReferenceInfo?.toString() ?? ''}",
                                           style: TextStyle(
                                             color: Colors.white.withOpacity(
                                               0.8,
@@ -461,11 +464,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   ),
 
                                   const SizedBox(height: 24),
-
+                                  // Proceed to Pay button
                                   Center(
                                     child: FractionallyElevatedButton(
                                       onTap: () async {
                                         if (billState
+                                                .getBillResponse![0]
+                                                .BillAmount
+                                                .toString()
+                                                .compareTo('0') <=
+                                            0) {
+                                          SnackbarService.showError(
+                                            'Invalid Amount',
+                                            'Amount must be greater then zero',
+                                          );
+                                        } else if (billState
                                                 .getBillResponse
                                                 ?.isNotEmpty ==
                                             true) {
@@ -497,13 +510,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                               "billId": billId,
                                               "consumerNumber": consumerNumber,
                                             },
+                                            
+
                                           );
+                                        } else {
+                                          null;
                                         }
                                       },
                                       title: 'PROCEED TO PAY',
                                     ),
                                   ),
                                   const SizedBox(height: 16),
+                                  // Cancel button
                                   Center(
                                     child: FloatingActionButton.extended(
                                       onPressed: () {
@@ -513,9 +531,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                       backgroundColor: AppColors.primaryColor,
                                       label: const Text(
                                         "Cancel",
-                                        style: TextStyle(color: Colors.white, fontSize: 13),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 13,
+                                        ),
                                       ),
-                                      icon: const Icon(Icons.clear, color: Colors.white),
+                                      icon: const Icon(
+                                        Icons.clear,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
                                 ],

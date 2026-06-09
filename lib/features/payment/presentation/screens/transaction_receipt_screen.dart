@@ -268,9 +268,9 @@ class _TransactionReceiptScreenState extends State<TransactionReceiptScreen> {
               Padding(
                 padding: EdgeInsets.all(4.w),
                 child: FractionallyElevatedButton(
-                  onTap: _isApiLoading
-                      ? null
-                      : () {
+                  onTap: (_isApiLoading || !_apiSuccess)
+    ? null
+    : () {
                           context.go(RouteNames.homeScreen);
                         },
                   title: 'DONE',
