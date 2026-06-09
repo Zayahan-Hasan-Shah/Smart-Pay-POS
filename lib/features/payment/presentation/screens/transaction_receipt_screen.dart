@@ -271,7 +271,8 @@ class _TransactionReceiptScreenState extends State<TransactionReceiptScreen> {
                   onTap: (_isApiLoading || !_apiSuccess)
     ? null
     : () {
-                          context.go(RouteNames.homeScreen);
+      
+                          context.go(RouteNames.homeScreen, extra: false);
                         },
                   title: 'DONE',
                 ),

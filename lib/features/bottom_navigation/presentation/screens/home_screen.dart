@@ -18,7 +18,8 @@ import '../../../../core/utils/app_colors.dart';
 import '../../../../view/components/common/fractionally_elevated_button.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+   bool isBillAvailable;
+   HomeScreen({super.key, required this.isBillAvailable});
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -119,6 +120,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: loginButton(
                         context: context,
                         onTap: () async {
+                          widget.isBillAvailable = true;
+                        
                           await billNotifier.getBill(
                             consumerNumberController.text,
                           );
@@ -155,7 +158,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
 
               // bill UI
-              if (!billState.isEmpty &&
+              if (widget.isBillAvailable &&
+                  !billState.isEmpty &&
                   billState.getBillResponse != null &&
                   billState.getBillResponse!.isNotEmpty)
                 Column(
@@ -510,8 +514,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                               "billId": billId,
                                               "consumerNumber": consumerNumber,
                                             },
-                                            
-
                                           );
                                         } else {
                                           null;

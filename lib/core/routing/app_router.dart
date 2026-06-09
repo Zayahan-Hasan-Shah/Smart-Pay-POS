@@ -31,7 +31,6 @@ class RouteNames {
   static const transactionReceiptScreen = '/transaction-receipt';
   static const addUpdateScreen = '/addupdate-screen';
   static const adminSettingsScreen = '/admin-settings';
-
 }
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -52,7 +51,10 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: RouteNames.homeScreen,
-      builder: (context, state) => const HomeScreen(),
+      builder: (context, state) {
+        // final bool data = state.extra as bool;
+       return HomeScreen(isBillAvailable: false);
+      },
     ),
     GoRoute(
       path: RouteNames.paymentScreen,
@@ -65,6 +67,7 @@ final GoRouter appRouter = GoRouter(
       path: RouteNames.transactionReceiptScreen,
       builder: (context, state) {
         final payload = state.extra as Map<String, dynamic>;
+        // final bool = state.extra;
         return TransactionReceiptScreen(payload: payload);
       },
     ),
