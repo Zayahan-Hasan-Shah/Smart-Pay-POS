@@ -266,39 +266,40 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return true;
   }
 
-  void _handleResponse(String line) {
-    if (line.contains("=")) {
-      var parts = line.split("=");
-      if (parts.length >= 2) {
-        String key = parts[0].trim();
-        String value = parts.sublist(1).join("=").trim();
-        _posReceiptData[key] = value;
+  void _handleResponse(String chunk) {
+    List<String> lines = chunk.split(RegExp(r'\r?\n'));
+    for (String line in lines) {
+      line = line.trim();
+      if (line.isEmpty) continue;
+
+      if (line.contains("=")) {
+        var parts = line.split("=");
+        if (parts.length >= 2) {
+          String key = parts[0].trim();
+          String value = parts.sublist(1).join("=").trim();
+          _posReceiptData[key] = value;
+        }
       }
-    }
 
-    if (line.contains("Decline")) {
-      if (!mounted) return;
-      SnackbarService.showError("Transaction Failed", "Card declined by POS");
-      context.go(RouteNames.homeScreen);
-    }
-
-    if (line.contains("---END---")) {
-      if (!mounted) return;
-
-      if (_posReceiptData["RESPONSE"] == "APPROVED" ||
-          _posReceiptData.values.any((v) => v.contains("APPROVED")) ||
-          line.contains("APPROVED")) {
-        final receiptPayload = {
-          "paymentData": widget.paymentData,
-          "posData": Map<String, String>.from(_posReceiptData),
-        };
-        context.go(RouteNames.transactionReceiptScreen, extra: receiptPayload);
-      } else {
-        SnackbarService.showError(
-          "Transaction Failed",
-          "Transaction was not approved.",
-        );
+      if (line.contains("Decline")) {
+        if (!mounted) return;
+        SnackbarService.showError("Transaction Failed", "Card declined by POS");
         context.go(RouteNames.homeScreen);
+      }
+      
+      if (line.contains("---END---")) {
+        if (!mounted) return;
+        
+        if (_posReceiptData["RESPONSE"] == "APPROVED" || _posReceiptData.values.any((v) => v.contains("APPROVED")) || line.contains("APPROVED")) {
+          final receiptPayload = {
+            "paymentData": widget.paymentData,
+            "posData": Map<String, String>.from(_posReceiptData)
+          };
+          context.go(RouteNames.transactionReceiptScreen, extra: receiptPayload);
+        } else {
+          SnackbarService.showError("Transaction Failed", "Transaction was not approved.");
+          context.go(RouteNames.homeScreen);
+        }
       }
     }
   }

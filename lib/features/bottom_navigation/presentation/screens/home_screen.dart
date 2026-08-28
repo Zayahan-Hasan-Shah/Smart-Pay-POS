@@ -28,6 +28,17 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   TextEditingController consumerNumberController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!widget.isBillAvailable) {
+        ref.read(billProvider.notifier).clearBill();
+        consumerNumberController.clear();
+      }
+    });
+  }
+
   Widget _buildIconDetail(String title, String value, IconData icon) {
     return Row(
       children: [
@@ -89,7 +100,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Column(
             children: [
               // Main content
-              if (billState.isEmpty ||
+              if (!widget.isBillAvailable ||
+                  billState.isEmpty ||
                   billState.getBillResponse == null ||
                   billState.getBillResponse!.isEmpty)
                 Column(

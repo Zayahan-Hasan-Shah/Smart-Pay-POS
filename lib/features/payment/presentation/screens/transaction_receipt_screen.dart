@@ -55,10 +55,10 @@ class _TransactionReceiptScreenState extends State<TransactionReceiptScreen> {
           consumerNumber.length >= 4
               ? consumerNumber.substring(0, 4)
               : consumerNumber;
-      String invoice = posData["INVOICENO"] ?? "unknown";
-      String card = (posData["CARDNO"] ?? "unknown").replaceAll("*", "");
+      String tid = posData["TID"] ?? "unknown";
+      String rrn = posData["RRNNO"] ?? posData["RRN"] ?? "unknown";
 
-      String transactionId = "${invoice}-${card}";
+      String transactionId = "$tid$rrn";
       if (transactionId.length > 20) {
         transactionId = transactionId.substring(0, 20);
       }
@@ -130,6 +130,8 @@ class _TransactionReceiptScreenState extends State<TransactionReceiptScreen> {
         ),
         body: SafeArea(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: SingleChildScrollView(
@@ -153,69 +155,24 @@ class _TransactionReceiptScreenState extends State<TransactionReceiptScreen> {
                         Center(
                           child: Column(
                             children: [
+                              SizedBox(height: 5.h),
                               Icon(
                                 Icons.check_circle,
                                 color: Colors.green,
-                                size: 15.w,
+                                size: 30.w,
                               ),
-                              SizedBox(height: 1.h),
+                              SizedBox(height: 2.h),
                               Text(
                                 "APPROVED",
                                 style: TextStyle(
-                                  fontSize: 22.sp,
+                                  fontSize: 26.sp,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.green[700],
                                 ),
                               ),
+                              SizedBox(height: 6.h),
                             ],
                           ),
-                        ),
-                        Divider(
-                          height: 4.h,
-                          thickness: 1.5,
-                          color: Colors.grey[300],
-                        ),
-                        ...posData.entries
-                            .map(
-                              (entry) => Padding(
-                                padding: EdgeInsets.symmetric(vertical: 0.8.h),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        entry.key,
-                                        style: TextStyle(
-                                          color: Colors.grey[600],
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 15.sp,
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: Text(
-                                        entry.value,
-                                        textAlign: TextAlign.right,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15.sp,
-                                          color: Colors.black87,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                            .toList(),
-                        Divider(
-                          height: 4.h,
-                          thickness: 1.5,
-                          color: Colors.grey[300],
                         ),
                         Center(
                           child: Row(
